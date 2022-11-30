@@ -1,7 +1,6 @@
 version=0.1
 title=Rick's MLC AdHocCmds
 description= Some ad hoc commands with triggers
-description=
-description= Languages supported:English and (possibly badly translated): Spanish, Korean, Portuguese
+description= WARNING: THIS MOD IS UNDER CONSTRUCTION - Ie: Not Finished Yet
 tags=Build 41
 visibility=public

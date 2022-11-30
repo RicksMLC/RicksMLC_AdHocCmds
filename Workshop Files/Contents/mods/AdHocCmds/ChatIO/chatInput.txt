@@ -1,4 +1,3 @@
-ChatPot=The chatpot is now n SpiffoBucks
-WASDHolder=Some Chat Person
-WeatherGod=Some other chat person?
-SpecialMessage=
+ChatPot.txt=hourly
+WeatherGod.txt=immediate
+WASDControl.txt=immediate

@@ -3,8 +3,9 @@
 --		 [ ] Use the radio to report changes caused by "Unusual Unknown Circumstances"
 --				Chaos Happens At Times - C.H.A.T. Radio
 
--- Note: https://projectzomboid.com/modding////index.html
+-- Note: https://projectzomboid.com/modding/index.html
 -- Note: https://pzwiki.net/wiki/Category:Lua_Events
+-- Touchportal
 
 require "ISBaseObject"
 require "RicksMLC_ChatIO"
@@ -14,13 +15,19 @@ RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
 
 local RicksMLC_ModName = "RicksMLC_AdHocCmds"
-local RicksMLC_relPath = "./ChatIO/chatInput.txt"
-RicksMLC_ChatIO_Instance = RicksMLC_ChatIO:new(RicksMLC_ModName, RicksMLC_relPath)
+local ZomboidPath = "./ChatIO/"
+local RicksMLC_CtrlFilePath = ZomboidPath .. "chatInput.txt"
 
 function RicksMLC_AdHocCmds:new()
 	local o = {}
 	setmetatable(o, self)
 	self.__index = self
+
+	o.ChatIO_CtrlFile = nil
+
+	o.weather = nil
+	o.radioScriptsImmediate = {}
+	o.radioScriptsHourly = {}
 
 	o.isStorming = false
 
@@ -53,6 +60,7 @@ function RicksMLC_AdHocCmds:StartKateBobIntroStorm(x, y)
 	local initialPuddles = 0.9
 	getClimateManager():triggerKateBobIntroStorm(x, y, duration, strength, initialProgress, angle, initialPuddles);
 	getClimateManager():getThunderStorm():triggerThunderEvent(x, y, true, true, true)
+	-- FIXME: Move these to the scheduled weather script
 	--getClimateManager():transmitTriggerTropical(duration)
 	--getClimateManager():triggerWinterIsComingStorm()
 
@@ -63,12 +71,11 @@ function RicksMLC_AdHocCmds:StartKateBobIntroStorm(x, y)
 		{ RicksMLC_Radio.Intro, colorWhite },
 		{ "An unknown force is creating havoc in our atmosphere", colorDarkBlue } 
 	}
-	local bc = RicksMLC_Radio.CreateBroadcast(getGameTime(), lines)
-	local radioChannel  = RadioScriptManager.getInstance():getRadioChannel(RicksMLC_Radio.channelUUID)
-	radioChannel:setAiringBroadcast(bc);
+	RicksMLC_Radio.BroadcastImmediate(lines)
 end
 
 function RicksMLC_AdHocCmds:StopStorm()
+	self.isStorming = false
 	local w = getClimateManager():getWeatherPeriod();
 	if w:isRunning() then
 		getClimateManager():stopWeatherAndThunder();
@@ -83,41 +90,224 @@ function RicksMLC_AdHocCmds:StopStorm()
 		{ "Folks, the storm has just ... vanished", colorDarkGreen },
 		{ "Just another day of reporting on " .. RicksMLC_Radio.name, colorDarkGreen }
 	}
-	local bc = RicksMLC_Radio.CreateBroadcast(getGameTime(), lines)
-	local radioChannel  = RadioScriptManager.getInstance():getRadioChannel(RicksMLC_Radio.channelUUID)
-	radioChannel:setAiringBroadcast(bc);
+	RicksMLC_Radio.BroadcastImmediate(lines)
+end
 
+
+function RicksMLC_AdHocCmds:StartStorm()
+	self:StartKateBobIntroStorm(getPlayer():getX(), getPlayer():getY())
+	self.isStorming = true
 end
 
 function RicksMLC_AdHocCmds:ToggleStorm()
-	local w = getClimateManager():getWeatherPeriod();
 	if self.isStorming then
 		self:StopStorm()
-		self.isStorming = false
 	else
-		self:StartKateBobIntroStorm(getPlayer():getX(), getPlayer():getY())
-		self.isStorming = true
+		self:StartStorm()
+	end
+end
+
+function RicksMLC_AdHocCmds:DumpChatIOFiles()
+	for k, v in pairs(self.ChatIO_CtrlFile.contentList) do
+		DebugLog.log(DebugType.Mod, "  " .. k .. " " .. v )
+	end
+end
+
+function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll)
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:LoadChatIOFiles() " .. RicksMLC_CtrlFilePath )
+	self.ChatIO_CtrlFile = RicksMLC_ChatIO:new(RicksMLC_ModName, RicksMLC_CtrlFilePath)
+	self.ChatIO_CtrlFile:Load("=", isForceReadAll)
+	self.ChatIO_CtrlFile:Save("=", true)
+
+	local chatFiles = {}
+	for k, v in pairs(self.ChatIO_CtrlFile.contentList) do
+		chatFiles[k] = v
+	end
+	for filename, schedule in pairs(chatFiles) do
+		local chatScriptFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ZomboidPath .. filename)
+		-- TODO: Add test for misspelt chat file name in chatInput.txt EG: WASDCtrl.txt
+		self:ScriptFactory(chatScriptFile, schedule, filename)
+	end
+end
+
+function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory()")
+	chatScriptFile:Load("=", false)
+	local scriptType = chatScriptFile.contentList["type"]
+	
+	if scriptType == "radioscript" then
+		-- Assign to its schedule or immediate
+		if schedule == "immediate" then
+			-- TODO: Schedule?
+			--self.radioScriptsImmediate[filename] = radioScript
+			local radioScript = RicksMLC_ChatScriptFile:new()
+			radioScript:AddLines(chatScriptFile.contentList)
+			radioScript:Broadcast()
+		elseif schedule == "hourly" then
+			local radioScript = RicksMLC_HourlyScriptFile:new()
+			radioScript:AddLines(chatScriptFile.contentList)
+			self.radioScriptsHourly[filename] = radioScript
+		else
+			DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory() Error: " .. filename .. ": unknown schedule '" .. schedule .. "'")
+		end
+	elseif scriptType == "weather" then
+		-- Create the new weather ctrl object to initiate
+		local wScript = RicksMLC_WeatherScript:new()
+		wScript:AddLines(chatScriptFile.contentList)
+		wScript:UpdateValues(chatScriptFile.contentList)
+		self.weather = wScript
+		--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory() TEST BROADCAST IMMEDIATE")
+		-- TODO: Schedule. Just broadcast it for now as a test
+		--self.weather:Broadcast()
+	end
+end
+
+function RicksMLC_AdHocCmds:HandleEveryTenMinutes()
+	self:LoadChatIOFiles(false)
+end
+
+function RicksMLC_AdHocCmds:HandleEveryHours()
+	for filename, radioScript in pairs(self.radioScriptsHourly) do
+		radioScript:Broadcast()
 	end
 end
 
 function RicksMLC_AdHocCmds:Init()
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:Init()")
+
 	local w = getClimateManager():getWeatherPeriod();
 	self.isStorming = (w:isThunderStorm() or w:isTropicalStorm())
+	self:LoadChatIOFiles(false)
+end
+
+function RicksMLC_AdHocCmds:MadWeather()
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:MadWeather()")
+	if not self.weather or self.weather.weatherType ~= "madness" then return end
+
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:MadWeather(): ")
+	if getPlayer():isOutside() then
+		if not self.isStorming then 
+			self:StartStorm()
+		end
+	else
+		if self.isStorming then
+			self:StopStorm()
+		end
+	end
+end
+
+---------------------------------------------------------------------------------------
+RicksMLC_ChatScriptFile = ISBaseObject:derive("RicksMLC_ChatScriptFile");
+function RicksMLC_ChatScriptFile:new()
+	local o = {}
+	setmetatable(o, self)
+	self.__index = self
+
+	o.filePath = nil		-- FIXME: Do I need this here?
+	o.updatePeriod = nil 	-- FIXME: Do I need this here?
+	o.lines = {}
+	o.lastUpdateTime = nil	-- FIXME: Do I need this here?
+
+    return o
+end
+
+function RicksMLC_ChatScriptFile:AddLines(contentList)
+	local i = 1
+	local line = contentList["line" .. i]
+	while line do
+		local colorName = contentList["line" .. i .. "color"]
+		local color = RicksMLC_Radio.GetColor(colorName)
+		table.insert(self.lines, {line, color})
+		i = i + 1
+		line = contentList["line" .. i]
+	end
+end
+
+function RicksMLC_ChatScriptFile:Broadcast()
+	RicksMLC_Radio.BroadcastImmediate(self.lines)
+end
+
+---------------------------------------------------------------------------------
+
+RicksMLC_HourlyScriptFile = RicksMLC_ChatScriptFile:derive("RicksMLC_HourlyScriptFile")
+function RicksMLC_HourlyScriptFile:new()
+	local o = RicksMLC_ChatScriptFile.new(self)
+	setmetatable(o, self)
+	self.__index = self
+
+	return o
+end
+
+function RicksMLC_HourlyScriptFile:Broadcast()
+	RicksMLC_Radio.BroadcastImmediate(self.lines)
+	--FIXME: Should add so it queues with other added broadcasts
+	--RicksMLC_Radio.AddBroadcast(self.lines)
+end
+
+----------------------------------------------------------------------------------
+
+RicksMLC_WeatherScript = RicksMLC_ChatScriptFile:derive("RicksMLC_WeatherScript")
+function RicksMLC_WeatherScript:new()
+	local o = RicksMLC_ChatScriptFile:new()
+	setmetatable(o, self)
+	self.__index = self
+
+	-- Default values:
+	o.weatherType = "KateBobIntro" -- Types: tropical thunder blizzard KateBobIntro (madness?)
+	o.duration = 20
+	o.strength = 0.75
+	o.initialProgress = 4
+	o.angle = 180
+	o.initialPuddles = 0.9
+
+	o.inGameStartTime = 0
+	return o
+end
+
+function RicksMLC_WeatherScript:UpdateValues(contentList)
+	self.weatherType = contentList["weatherType"] or self.weatherType
+	self.duration = contentList["duration"] or self.duration
+	self.strength = contentList["strength"] or self.strength
+	self.initialProgress = contentList["initialProgress"] or self.initialProgress
+	self.angle = contentList["angle"] or self.angle
+	self.initialPuddles = contentList["initialPuddles"] or self.initialPuddles
 end
 
 ---------------------------------------------------------------------------------------
 -- Static Methods
+
+function RicksMLC_AdHocCmds.EveryHours()
+	if not RicksMLC_AdHocCmdsInstance then return end
+
+	RicksMLC_AdHocCmdsInstance:HandleEveryHours()
+end
+
+function RicksMLC_AdHocCmds.EveryTenMinutes()
+	if not RicksMLC_AdHocCmdsInstance then return end
+
+	RicksMLC_AdHocCmdsInstance:HandleEveryTenMinutes()
+end
+
+function RicksMLC_AdHocCmds.EveryOneMinute()
+	if not RicksMLC_AdHocCmdsInstance then return end
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.EveryOneMinute()")
+	RicksMLC_AdHocCmdsInstance:MadWeather()
+
+end
 
 function RicksMLC_AdHocCmds.OnKeyPressed(key)
 	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnKeyPressed()")
 
 	if not RicksMLC_AdHocCmdsInstance then return end
 
-	if isAltKeyDown() then
+	--if isAltKeyDown() then
 		if key == Keyboard.KEY_F9 then
 			RicksMLC_AdHocCmdsInstance:ToggleStorm()
+		elseif key == Keyboard.KEY_F10 then
+			-- Forces load of all chatInput.txt files, including commented out ones
+			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(true)
 		end
-	end
+	--end
 end
 
 function RicksMLC_AdHocCmds.OnCreatePlayer()
@@ -126,9 +316,11 @@ function RicksMLC_AdHocCmds.OnCreatePlayer()
 
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init()
-	
 end
 
 Events.OnCreatePlayer.Add(RicksMLC_AdHocCmds.OnCreatePlayer)
 Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
+Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
+Events.EveryTenMinutes.Add(RicksMLC_AdHocCmds.EveryTenMinutes)
+Events.EveryHours.Add(RicksMLC_AdHocCmds.EveryHours)
 

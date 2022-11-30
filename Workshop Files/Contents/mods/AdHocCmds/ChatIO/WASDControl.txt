@@ -1,0 +1,3 @@
+type=radioscript
+line1=<chatter> has control of the WASD
+line2=<chatter1> has relinquished control to <chatter2>

@@ -1,0 +1,13 @@
+type=radioscript
+line1=Everyone's a winner on Radio C.H.A.T
+line1color=orange
+line2=Listener <chatter> just added <n> to the pot!
+line2color=orange
+line3=The prize pool is now <poolamount>!
+line3color=orange
+line4=Only <remaining> to go!
+line4color=blue
+chatter=ChatName
+n=100
+poolamount=2000
+remaining=28000
