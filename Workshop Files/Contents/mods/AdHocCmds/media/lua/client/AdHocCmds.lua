@@ -304,8 +304,8 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 		if key == Keyboard.KEY_F9 then
 			RicksMLC_AdHocCmdsInstance:ToggleStorm()
 		elseif key == Keyboard.KEY_F10 then
-			-- Forces load of all chatInput.txt files, including commented out ones
-			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(true)
+			-- Forces load of all chatInput.txt file
+			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false)
 		end
 	--end
 end
