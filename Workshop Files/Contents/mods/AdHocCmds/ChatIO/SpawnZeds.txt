@@ -1,7 +1,24 @@
 type=spawn
 zedname=Foo Bar
-outfit=StripperBlack
-gender=female
+radius=
+offset=
+facing=
+zCount1=3
+gender1=f
+outfit1=AirCrew
+
+line1=Warning: There are reports of three AirCrew named "Foo Bar" who are considered dangerous.
+line2=These individuals are identifiable by their dog tags.
+
+-- Notes: If "facing" is set to anything (eg: facing=yes) the "offset" is the spawn distance directly in front of 
+-- the player. "radius" is ignored.  If facing is not set (ie: facing=) the spawn point is a random point within a
+-- circle around the player of radius "radius".  The zeds are then moved "offset" distance from the player, so
+-- they could not spawn directly on the player.
+--
+-- The "outfit" will override the "gender".  If the gender does not match the outfit's gender then the
+-- gender for the outfit will be used instead.
+-- Leaving gender blank will cause the outfit to spawn for its gender.  If the same outfit is available for
+-- both genders (eg "chef") then it will generate a randomised group of male and female versions.
 
 --zf=Female outfits:
 --zf0=1RJTest

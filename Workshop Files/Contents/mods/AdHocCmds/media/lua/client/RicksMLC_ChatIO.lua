@@ -9,18 +9,9 @@
 -- https://projectzomboid.com/modding/index.html
 
 require "ISBaseObject"
+require "RicksMLC_Utils"
 RicksMLC_ChatIO = ISBaseObject:derive("RicksMLC_ChatIO");
 
-local function splitstr(inputstr, sep)
-	if sep == nil then
-		sep = "%s"
-	end
-	local t={}
-	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-		table.insert(t, str)
-	end
-	return t
-end
 
 function RicksMLC_ChatIO:new(modName, saveFilePath)
 	local o = {}
@@ -77,7 +68,7 @@ function RicksMLC_ChatIO:Load(delim, resetComments)
 			end
 			local i = line:find("%-%-")
 			if not i or i ~= 1 then
-				listLine = splitstr(line, delim)
+				listLine = RicksMLC_Utils.SplitStr(line, delim)
 				local key = listLine[1]
 				table.remove(listLine, 1)
 				self.contentList[key] = listLine[1]

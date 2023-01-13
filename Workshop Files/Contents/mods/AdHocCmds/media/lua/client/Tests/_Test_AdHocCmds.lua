@@ -100,7 +100,6 @@ end
 
 function AdHocCmds_Test:Init()
     DebugLog.log(DebugType.Mod, "AdHocCmds_Test:Init()")
-    -- Create the test instance of the ISRemoveGrass
 
     self.player = MockPlayer:new(getPlayer())
 

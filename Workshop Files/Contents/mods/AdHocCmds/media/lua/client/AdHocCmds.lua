@@ -166,6 +166,8 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 	elseif scriptType == "spawn" then
 		local spawnScript = RicksMLC_Spawn:new(chatScriptFile)
 		spawnScript:Spawn(chatScriptFile.contentList)
+		spawnScript:AddLines(chatScriptFile.contentList)
+		spawnScript:Broadcast()
 	end
 end
 
@@ -278,106 +280,6 @@ function RicksMLC_WeatherScript:UpdateValues(contentList)
 	self.initialProgress = contentList["initialProgress"] or self.initialProgress
 	self.angle = contentList["angle"] or self.angle
 	self.initialPuddles = contentList["initialPuddles"] or self.initialPuddles
-end
-
----------------------------------------------------------------------------------------
-RicksMLC_Spawn = RicksMLC_ChatScriptFile:derive("RicksMLC_Spawn")
-function RicksMLC_Spawn:new(spawnFile)
-	local o = RicksMLC_ChatScriptFile:new()
-	setmetatable(o, self)
-
-	o.spawnFile = spawnFile
-	o.spawner = nil
-	o.outfit = nil
-
-	self.__index = self
-	return o
-end
-
-function RicksMLC_Spawn:Spawn(paramList)
-	--DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:Spawn()")
-
-	self.spawner = paramList["zedname"]
-
-	local radius = 10
-	local offset = 12
-	local xCentre = ZombRand(-radius, radius + 1)
-	if xCentre < 0 then
-		xCentre = xCentre - offset
-	else
-		xCentre = xCentre + offset
-	end
-	local yCentre = ZombRand(-radius, radius + 1)
-	if yCentre < 0 then
-		yCentre = yCentre - offset
-	else
-		yCentre = yCentre + offset
-	end
-	local x = getPlayer():getX() + xCentre
-	local y = getPlayer():getY() + yCentre
-
-	local i = 1
-	local zCount = tonumber(paramList["zCount" .. tostring(i)])
-	local fullZombieList = nil
-	while zCount do
-		local outfit = paramList["outfit" .. tostring(i)]
-		local gender = paramList["gender" .. tostring(i)] -- "f"= female "m" = male.  Other = random
-		local femaleChance = ZombRand(0, 100)
-		if gender then
-			if gender == "m" then
-				femaleChance = 0
-			elseif gender == "f" then
-				femaleChance = 100
-			end
-		end
-
-		--DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:Spawn() " .. tostring(i) .. " zCount: " .. tostring(zCount) .. " '" .. tostring(outfit) .. "'")
-
-		local crawler = false
-		local isFallOnFront = true
-		local isFakeDead = false
-		local knockedDown = true
-		local health = ZombRand(1, 2.9)
-		local zombieList = addZombiesInOutfit(x, y, getPlayer():getZ(), zCount, outfit, femaleChance, crawler, isFallOnFront, isFakeDead, knockedDown, health);
-		if fullZombieList == nil then
-			fullZombieList = zombieList
-		else
-			fullZombieList:addAll(zombieList)
-		end
-		i = i + 1
-		zCount = tonumber(paramList["zCount" .. tostring(i)])
-	end
-	local numZombies = fullZombieList:size()
-	local zId = 1
-	for j=0, numZombies - 1 do
-		local zombie = fullZombieList:get(j)
-		local dogtag = InventoryItemFactory.CreateItem("Necklace_DogTag")
-		dogtag:setName(dogtag:getDisplayName() .. ": " .. self.spawner .. " " .. tostring(zId) .. " (of " .. tostring(numZombies) .. ")");
-		dogtag:setCustomName(true);
-		zombie:addItemToSpawnAtDeath(dogtag)
-		zId = zId + 1
-	end
-
-	--self:WriteOutfits()
-
-end
-
-function RicksMLC_Spawn:WriteOutfits()
-	DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:WriteOutfits()")
-
-	local femaleOutfits = getAllOutfits(true);
-	self.spawnFile.contentList["zf"] = "Female outfits:"
-	for i=0, femaleOutfits:size()-1 do
-		self.spawnFile.contentList["zf" .. tostring(i)] = femaleOutfits:get(i)
-	end
-
-	local maleOutfits = getAllOutfits(false);
-	self.spawnFile.contentList["zm"] = "Male outfits:"
- 	for i=0, maleOutfits:size()-1 do
-		self.spawnFile.contentList["zm" .. tostring(i)] = maleOutfits:get(i)
-	end
-
-	self.spawnFile:Save("=", false)
 end
 
 ---------------------------------------------------------------------------------------
