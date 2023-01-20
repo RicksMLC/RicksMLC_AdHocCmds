@@ -1,0 +1,5 @@
+-- Chat Supply File.
+--  Set the category to one of the keys in the ChatSuppliesConfig.txt file.
+
+type=chatsupply
+category=food

@@ -303,13 +303,12 @@ end
 function RicksMLC_Spawn.AddPrize(invPage)
     --local type = "Acorn"
     local type = RicksMLC_VendingMachineConfig.Instance():GetRandomPrize()
-    prize = InventoryItemFactory.CreateItem(type)
+    local prize = InventoryItemFactory.CreateItem(type)
     local vendingMachineItemContainer = invPage.inventoryPane.inventory
     local vendingMachine = vendingMachineItemContainer:getParent()
     local time = 100
     local action = ISCashInVendAction:new(getPlayer(), vendingMachine, invPage, prize, time)
     ISTimedActionQueue.add(action)
-
 end
 
 function RicksMLC_Spawn.ParseDogTag(fullName)

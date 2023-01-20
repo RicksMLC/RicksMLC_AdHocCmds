@@ -3,3 +3,5 @@ ChatPot.txt=hourly
 --WASDControl.txt=immediate
 --SpawnZeds.txt=immediate
 VendingConfig.txt=immediate
+ChatSupplyConfig.txt=immediate
+--ChatSupply.txt=immediate

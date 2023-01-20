@@ -11,6 +11,7 @@ require "ISBaseObject"
 require "RicksMLC_ChatIO"
 require "RicksMLC_Radio"
 require "ISSpawnHordeUI"
+require "RicksMLC_ChatSupply"
 
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
@@ -174,6 +175,11 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		spawnScript:Broadcast()
 	elseif scriptType == "vendingconfig" then
 		RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
+	elseif scriptType == "chatsupplyconfig" then
+		RicksMLC_ChatSupplyConfig.Instance():Update(chatScriptFile)
+	elseif scriptType == "chatsupply" then
+		local supplyScript = RicksMLC_ChatSupply:new(chatScriptFile)
+		supplyScript:Supply()
 	end
 end
 
