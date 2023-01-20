@@ -2,3 +2,4 @@ ChatPot.txt=hourly
 --WeatherGod.txt=immediate
 --WASDControl.txt=immediate
 --SpawnZeds.txt=immediate
+VendingConfig.txt=immediate

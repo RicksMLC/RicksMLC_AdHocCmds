@@ -12,7 +12,6 @@ require "ISBaseObject"
 require "RicksMLC_Utils"
 RicksMLC_ChatIO = ISBaseObject:derive("RicksMLC_ChatIO");
 
-
 function RicksMLC_ChatIO:new(modName, saveFilePath)
 	local o = {}
 	setmetatable(o, self)

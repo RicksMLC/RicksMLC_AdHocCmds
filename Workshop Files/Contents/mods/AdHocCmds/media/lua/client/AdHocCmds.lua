@@ -16,7 +16,11 @@ RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
 
 local RicksMLC_ModName = "RicksMLC_AdHocCmds"
+function RicksMLC_AdHocCmds.GetModName() return RicksMLC_ModName end
+
 local ZomboidPath = "./ChatIO/"
+function RicksMLC_AdHocCmds.GetZomboidPath() return ZomboidPath end
+
 local RicksMLC_CtrlFilePath = ZomboidPath .. "chatInput.txt"
 
 function RicksMLC_AdHocCmds:new()
@@ -168,6 +172,8 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		spawnScript:Spawn(chatScriptFile.contentList)
 		spawnScript:AddLines(chatScriptFile.contentList)
 		spawnScript:Broadcast()
+	elseif scriptType == "vendingconfig" then
+		RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
 	end
 end
 
@@ -313,7 +319,10 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 			RicksMLC_AdHocCmdsInstance:ToggleStorm()
 		elseif key == Keyboard.KEY_F10 then
 			-- Forces load of all chatInput.txt file
+			--local startTime = getTimeInMillis()
 			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false)
+			--local endTime = getTimeInMillis()
+    		--DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed Time: " .. tostring(endTime - startTime) .. "ms")
 		end
 	--end
 end
