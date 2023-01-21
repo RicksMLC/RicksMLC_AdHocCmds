@@ -23,7 +23,7 @@ function RicksMLC_ChatSupplyConfig:Update(configFile)
     DebugLog.log(DebugType.Mod, "RicksMLC_ChatSuppliesConfig:Update() " .. type(self.supplies))
     for key, value in pairs(configFile.contentList) do
         if key ~= "type" and value then
-            DebugLog.log(DebugType.Mod, "  key: '" .. key .. "' value: '" .. value .. "'")
+            --DebugLog.log(DebugType.Mod, "  key: '" .. key .. "' value: '" .. value .. "'")
             local supplyList = RicksMLC_Utils.SplitStr(value, ",")
             self.supplies[key] = supplyList
         end

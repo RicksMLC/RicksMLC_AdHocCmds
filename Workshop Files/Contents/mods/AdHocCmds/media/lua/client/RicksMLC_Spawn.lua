@@ -312,7 +312,7 @@ function RicksMLC_Spawn.AddPrize(invPage)
 end
 
 function RicksMLC_Spawn.ParseDogTag(fullName)
-    local zedName, zedId, zedCount = string.match(fullName, "%:%s([%a%s%.%-%_%']+)%s%((%d+)%sof%s(%d+)%)")
+    local zedName, zedId, zedCount = string.match(fullName, "%:%s([%a%d%s%.%-%_%']+)%s%((%d+)%sof%s(%d+)%)")
     if not (zedName and zedId and zedCount) then return nil end
     return {zedName..zedCount, tonumber(zedCount), tonumber(zedId)}
 end
