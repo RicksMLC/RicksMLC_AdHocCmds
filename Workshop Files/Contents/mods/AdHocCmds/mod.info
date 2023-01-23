@@ -1,8 +1,28 @@
 name=Rick's MLC Ad Hoc Commands
 poster=poster.png
 id=RicksMLC_AdHocCmds
-description= Just a little mod to trigger some things... <LINE>
-description= WARNING: THIS MOD IS UNDER CONSTRUCTION - Ie: Not Finished Yet <LINE>
-description= ...<bzzt> 106.8 <zzdt> ...
-description= Vending Machine Sound Effect used under Creative Commons from YouTuber "@Free High Quality Sound FX"
+description= Chat integration tool to allow chat to interact with the player. <LINE>
+description= <LINE>
+description= WARNING: THIS MOD IS UNDER CONSTRUCTION - Ie: Not Finished Yet (but works for some definintion of "works") <LINE>
+description= ...*bzzt* 106.8 *zzdt* ...  <LINE>
+description= <LINE>
+description= This tool uses .txt files to update control and trigger actions in the game. <LINE>
+description- One of the main purposes is to facilitate the interaction between streamer chat (ie Twitch or Youtube etc) 
+description= and the running PZ game by using something like TouchPortal to read the chat interaction 
+description= and update the ChatIO files in real-time to interact with the streamer's game. <LINE>
+description= <LINE>
+description= Features: <LINE>
+description= <INDENT:20> * Spawn Zombies near the player (Spawned zombies have custom dogtags) <LINE>
+description= <INDENT:20> * Radio C.H.A.T (106.8MHz) - chat can say things on a radio in-game  <LINE>
+description= <INDENT:20> * Toggle storms <LINE>
+description= <INDENT:20> * Chat can supply items to the player inventory <LINE>
+description= <INDENT:20> * Cash in dogtags at Vending Machines for prizes (no refunds) <LINE>
+description= <INDENT:20> * All features listed above are configurable in the text files in the  /ChatIO/ directory of the mod. <LINE>
+description= <INDENT:0><LINE>
+description= It is strongly recommended you back up any customised files before updating this mod, as mod updates may clear custom files from the ChatIO directory. <LINE>
+description= <LINE>
+description= Instructions can be found in the ChatIO/*.txt files. <LINE>
+description= <LINE>
+description= Vending Machine Sound Effect used under Creative Commons from YouTuber "@Free High Quality Sound FX" <LINE>
+
 url=

@@ -1,0 +1,49 @@
+-- Chat Supplies Config. The categories defined below are used in the ChatSupply.txt file.
+--
+-- Usage - First Time (Before starting Project Zomboid):
+--  1) Copy this file to "ChatSupplyConfig.txt"
+--  2) Update the ChatSupplyConfig.txt file with your changes. (See "Customisation" below)
+--  3) Add the line "ChatSupplyConfig.txt=immediate" to the boot.txt file, if it is not 
+--     alredy there.
+--  4) Start Project Zomboid and the boot.txt file will be used on game start.
+--
+-- Usage - Real Time Update: (Project Zomboid map is active ie: Player is in the game)
+--  1) Update the ChatSupplyConfig.txt file with your changes. (See "Customisation" below)
+--  2) Add the line "ChatSupplyConfig.txt=immediate" to the chatInput.txt file. Note this 
+--     is not commented out with "--".
+--  3) Either force the update with <F10> or wait.  The chatInput.txt file is read every ten
+--     in-game minutes if not forced.
+--  4) After the chatInput.txt has applied the "=immediate" lines will be automatically 
+--     commented out.
+--
+-- Customisation:
+--  To add more categories simply add a line with the format "categoryName=itemNameA,itemNameB,etc"
+--  to the list below. The name of the category should use only alphabetic characters (no punctuation) 
+--  and should not be the word "type" as this is reserved.
+--
+--  More than one version of this file can be created with names different to "ChatSupplyConfig.txt".
+--  This allows for customising which items are available without having to edit the "ChatSupplyConfig.txt"
+--  file every time.  The only requirement for a chat supply config file is the line "type=chatsupplyconfig"
+--  is in the file and at least one "categoryName=blah" line is included.  To use it follow the 
+--  "Usage - Real Time Update" instructions above, with the name of the new file substituted for
+--  "ChatSupplyConfig.txt"
+--
+--  Note: Categories are not additive between different config files.  Each time a config file is
+--        loaded all categories are cleared and reloaded.
+--        Restarting PZ will reset the chat supply configuration to the one specified in the boot.txt file.
+--
+--   It is strongly recommended you back up the customised files before updating this mod, as 
+--   updates to the mod from the workshop may clear the ChatIO directory.
+
+type=chatsupplyconfig
+
+-- Supplies:
+food=Crisps,Sandwich,Pop,Plonkies,Burger,BeerBottle,Chardonnay,Wine2,WaterBottleFull,TeaBag2
+health=PillsBeta,PillsAntiDep,Pills,PillsSleepingTablets,PillsVitamins,Tissue
+other=Lighter,Cigarettes,WristWatch_Left_DigitalBlack,Needle,Thread,Battery,SharpedStone,MugSpiffo,Woodglue,Spiffo,DeadRat
+clothing=SpiffoSuit,Bag_School,Hat_Raccoon,Hat_SummerHat,Hat_FastFood_IceCream,Hat_FastFood_Spiffo
+
+-- Weapons:
+melee=BaseballBat,Crowbar,GardenHoe,CanoePaddle,AxeStone,Axe
+guns=Pistol,9mmClip,Bullets9mmBox,Shotgun,ShotgunShellsBox
+rare=Sledgehammer

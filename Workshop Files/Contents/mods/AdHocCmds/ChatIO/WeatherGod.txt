@@ -1,12 +1,15 @@
+-- Weather control script.  Update this in chatInput.txt with "WeatherGog.txt=immediate" to trigger this weather setting
+-- Possible "weatherType=" values are tropical thunder blizzard KateBobIntro madness
+-- "line1=" etc are Radio C.H.A.T. script lines broadcast when this weather event is started.
+
 type=weather
-line1=<stormtype> '<chatter>' has swept in faster than anticipated.
-line1color=white
-line2=Take shelter where you can.
-line2color=red
 weatherType=madness
 duration=20
 strength=0.75
 initialProgress=6
 angle=180
 initialPuddles=0.9
-
+line1=<stormtype> '<chatter>' has swept in faster than anticipated.
+line1color=white
+line2=Take shelter where you can.
+line2color=red

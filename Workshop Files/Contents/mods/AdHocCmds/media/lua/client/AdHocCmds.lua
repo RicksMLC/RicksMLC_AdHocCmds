@@ -23,6 +23,7 @@ local ZomboidPath = "./ChatIO/"
 function RicksMLC_AdHocCmds.GetZomboidPath() return ZomboidPath end
 
 local RicksMLC_CtrlFilePath = ZomboidPath .. "chatInput.txt"
+local RicksMLC_CtrlBootFilePath = ZomboidPath .. "boot.txt"
 
 function RicksMLC_AdHocCmds:new()
 	local o = {}
@@ -119,11 +120,13 @@ function RicksMLC_AdHocCmds:DumpChatIOFiles()
 	end
 end
 
-function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll)
+function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll, ctrlFilePath)
 	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:LoadChatIOFiles() " .. RicksMLC_CtrlFilePath )
-	self.ChatIO_CtrlFile = RicksMLC_ChatIO:new(RicksMLC_ModName, RicksMLC_CtrlFilePath)
+	self.ChatIO_CtrlFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ctrlFilePath)
 	self.ChatIO_CtrlFile:Load("=", isForceReadAll) 	-- Read the list of chat files to read
-	self.ChatIO_CtrlFile:Save("=", true)			-- Comment out the control file contents 
+	if ctrlFilePath ~= RicksMLC_CtrlBootFilePath then
+		self.ChatIO_CtrlFile:Save("=", true)			-- Comment out the control file contents 
+	end
 
 	-- Load each file from the control file and perform their commands
 	local chatFiles = {}
@@ -184,7 +187,7 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 end
 
 function RicksMLC_AdHocCmds:HandleEveryTenMinutes()
-	self:LoadChatIOFiles(false)
+	self:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 end
 
 function RicksMLC_AdHocCmds:HandleEveryHours()
@@ -198,7 +201,7 @@ function RicksMLC_AdHocCmds:Init()
 
 	local w = getClimateManager():getWeatherPeriod();
 	self.isStorming = (w:isThunderStorm() or w:isTropicalStorm())
-	self:LoadChatIOFiles(false)
+	self:LoadChatIOFiles(false, RicksMLC_CtrlBootFilePath)
 end
 
 function RicksMLC_AdHocCmds:MadWeather()
@@ -224,10 +227,7 @@ function RicksMLC_ChatScriptFile:new()
 	setmetatable(o, self)
 	self.__index = self
 
-	o.filePath = nil		-- FIXME: Do I need this here?
-	o.updatePeriod = nil 	-- FIXME: Do I need this here?
 	o.lines = {}
-	o.lastUpdateTime = nil	-- FIXME: Do I need this here?
 
     return o
 end
@@ -311,9 +311,8 @@ end
 
 function RicksMLC_AdHocCmds.EveryOneMinute()
 	if not RicksMLC_AdHocCmdsInstance then return end
-	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.EveryOneMinute()")
-	RicksMLC_AdHocCmdsInstance:MadWeather()
 
+	RicksMLC_AdHocCmdsInstance:MadWeather()
 end
 
 function RicksMLC_AdHocCmds.OnKeyPressed(key)
@@ -326,24 +325,24 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 		elseif key == Keyboard.KEY_F10 then
 			-- Forces load of all chatInput.txt file
 			--local startTime = getTimeInMillis()
-			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false)
+			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 			--local endTime = getTimeInMillis()
     		--DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed Time: " .. tostring(endTime - startTime) .. "ms")
 		end
 	--end
 end
 
-function RicksMLC_AdHocCmds.OnCreatePlayer()
+function RicksMLC_AdHocCmds.OnGameStart()
     --DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnCreatePlayer(): ")
 	if isServer() then return end
 
+	RicksMLC_Spawn.Init()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
-	RicksMLC_AdHocCmdsInstance:Init()
+	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
 end
 
-Events.OnCreatePlayer.Add(RicksMLC_AdHocCmds.OnCreatePlayer)
+Events.OnGameStart.Add(RicksMLC_AdHocCmds.OnGameStart)
 Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
 Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
 Events.EveryTenMinutes.Add(RicksMLC_AdHocCmds.EveryTenMinutes)
 Events.EveryHours.Add(RicksMLC_AdHocCmds.EveryHours)
-

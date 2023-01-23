@@ -1,2 +1,0 @@
-type=vendingconfig
-prizes=Acorn,Chips,Bullets9mmBox,Hammer,Plonkies,Crowbar,ShotgunShellsBox,PillsBeta,PillsAntiDep,Pills,PillsSleepingTablets,PillsVitamins,Tissue,GardenHoe,CanoePaddle,AxeStone,Axe,Wine2

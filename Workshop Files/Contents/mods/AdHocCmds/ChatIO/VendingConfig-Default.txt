@@ -1,0 +1,58 @@
+-- Vending Machine configuration file.
+--
+-- Vending machine will dispense a random "prize" from the prizes list which corresponds to
+-- the tier of the cash-in. The choice of tier is based on the number of zombies in the cashed-in
+-- collection, where number of zombies is between the low number and high number (inclusive) of the
+-- tier.  Ie: NumZombies >= lowNumber and NumZombies <= highNumber.
+--
+-- Eg: Cashing in the dogtags named "Harold P. Qwerty (n of 5)" will choose a random prize from
+--     the "tier2=5-9" tier "prizes2" line.
+--
+-- Usage - First Time (Before starting Project Zomboid):
+--  1) Copy this file to "VendingConfig.txt"
+--  2) Update the VendingConfig.txt file with your changes.
+--  3) Remove the "-Default" text from the boot.txt file so the line reads as "VendingConfig.txt=immediate".
+--  4) Start Project Zomboid and the boot.txt file will be used on game start.
+--
+-- Usage - Real Time Update: (Project Zomboid map is active ie: Player is in the game)
+--  1) Update the VendingConfig.txt file with your changes.
+--  2) Add the line "VendingConfig.txt=immediate" to the chatInput.txt file. Note this line is 
+--     not commented out with "--".
+--  3) Either force the update with <F10> or wait.  The chatInput.txt file is read every ten in-game
+--     minutes if not forced.
+--  4) After the chatInput.txt has been applied the "immediate" lines will be automatically commented 
+--     out in chatInput.txt.
+--
+-- Customisation:
+--  To add more tiers and prizes simply add a "tier" and "prizes" with the next number appended to the name.
+--  Just make sure there are no gaps in the number sequence.
+--
+--  More than one version of this file can be created with names different to "VendingConfig.txt".  This 
+--  allows for customising which items are available without having to edit the "VendingConfig.txt" file
+--  every time.  The only requirement for a vending machine config file is the line "type=vendingconfig" 
+--  is in the file and at least one "tier1=blah" and "prizes1=item"  is included.  To use it follow the
+--  "Usage - Real Time Update" instructions above, with the name of the new file substituted for 
+--  "VendingConfig.txt"
+--
+--  Note: Tiers, containers and prizes are not additive between different config files.  Each time the 
+--        config file is loaded the existing containers, tiers and prizes are cleared and reloaded.
+--        Restarting PZ will reset the Vending Machine config to the config declared in the boot.txt file.
+--
+--   It is strongly recommended you back up the customised files before updating this mod, as updates 
+--   to the mod from the workshop may clear the ChatIO directory.
+
+type=vendingconfig
+
+-- Definition of "container" special items (Format: containerN=PrizeName,ContainerItem,item[,item...])
+container1=SackOfNuts,EmptySandbag,Acorn,Acorn
+container2=SewingKitFull,SewingKit,Scissors,Needle,Thread
+
+tier1=1-4
+tier2=5-9
+tier3=10-14
+tier4=15-20
+
+prizes1=Acorn,Crisps,AxeStone,SackOfNuts
+prizes2=Plonkies,Hammer,Bullets9mmBox,Pistol,9mmClip,SewingKitFull
+prizes3=Crowbar,PillsBeta,Wine2
+prizes4=Shotgun,ShotgunShellsBox

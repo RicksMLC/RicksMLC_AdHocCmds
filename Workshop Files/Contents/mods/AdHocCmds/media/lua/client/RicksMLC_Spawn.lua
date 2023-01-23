@@ -168,7 +168,7 @@ end
 -- Vending Machine implementation
 RicksMLC_VendingMachineConfig = ISBaseObject:derive("RicksMLC_VendingMachineConfig")
 
-RicksMLC_VendingConfigInstance = RicksMLC_VendingMachineConfig:new()
+RicksMLC_VendingConfigInstance = nil
 function RicksMLC_VendingMachineConfig.Instance()
     if not RicksMLC_VendingConfigInstance then
         RicksMLC_VendingConfigInstance = RicksMLC_VendingMachineConfig:new()
@@ -181,25 +181,116 @@ function RicksMLC_VendingMachineConfig:new()
 	setmetatable(o, self)
 	self.__index = self
 
+    o.minMaxTiers = {}
+    o.tiers = {}
     o.prizes = {}
+    o.containers = {}
 
 	return o
 end
 
-function RicksMLC_VendingMachineConfig:Update(vendingConfigFile)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:Update() ")
-    local prizeLine = vendingConfigFile:Get("prizes")
-    self.prizes = RicksMLC_Utils.SplitStr(prizeLine, ",")
+function RicksMLC_VendingMachineConfig:UpdateAttribute(vendingConfigFile, attrib, attribName, delim)
+    local i = 1
+    local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+    while attribLine do
+        local attribList = RicksMLC_Utils.SplitStr(attribLine, delim)
+        attrib[i] = attribList
+        i = i + 1
+        attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+    end
 end
 
-function RicksMLC_VendingMachineConfig:GetRandomPrize()
-    if #self.prizes == 0 then 
-        DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() Error - no prizes in list")
+function RicksMLC_VendingMachineConfig:UpdateTiers(vendingConfigFile)
+    self:UpdateAttribute(vendingConfigFile, self.tiers, "tier", "%-")
+
+    -- Convert the strings from the input file to numbers
+    for i = 1, #self.tiers do
+        for j = 1, #self.tiers[i] do
+            if type(self.tiers[i][j]) == "string" then
+                self.tiers[i][j] = tonumber(self.tiers[i][j])
+            end
+            if j == 1 and (not self.minMaxTiers[1] or self.tiers[i][j] < self.minMaxTiers[1]) then
+                self.minMaxTiers[1] = self.tiers[i][j]
+            elseif j == 2 and (not self.minMaxTiers[2] or self.tiers[i][j] > self.minMaxTiers[2]) then
+                self.minMaxTiers[2] = self.tiers[i][j]
+            end
+        end
+    end
+end
+
+function RicksMLC_VendingMachineConfig:UpdatePrizes(vendingConfigFile)
+    self:UpdateAttribute(vendingConfigFile, self.prizes, "prizes", ",")
+end
+
+function RicksMLC_VendingMachineConfig:MakeContainer(containerList)
+    -- Returns: ContainerItem with items.
+
+    local container = InventoryItemFactory.CreateItem(containerList[2])
+    for i=3,#containerList do 
+        local item = InventoryItemFactory.CreateItem(containerList[i])
+        if item then
+            container:getInventory():AddItem(item)
+        end
+    end
+    return container
+end
+
+function RicksMLC_VendingMachineConfig:AddContainerPrizes(vendingConfigFile)
+    -- Special prizes:
+    -- Eg: container1=SackOfNuts,EmptySandbag,Acorn,Acorn
+
+    local i = 1
+    local attribName = "container"
+    local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+    while attribLine do
+        local attribList = RicksMLC_Utils.SplitStr(attribLine, ",")
+        self.containers[attribList[1]] = self:MakeContainer(attribList)
+        i = i + 1
+        attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+    end
+end
+
+function RicksMLC_VendingMachineConfig:Update(vendingConfigFile)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:Update() ")
+    -- Clear the existing tables for re-population
+    self.containers = {}
+    self.tiers = {}
+    self.prizes = {}
+    self:AddContainerPrizes(vendingConfigFile) -- Do this first so they are available for UpdatePrizes()
+    self:UpdateTiers(vendingConfigFile)
+    self:UpdatePrizes(vendingConfigFile)
+end
+
+function RicksMLC_VendingMachineConfig:CalcTierNum(numZombies)
+    if #self.tiers == 0 then 
+        DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:CalcTierNum() Error - no tiers set ")
+        return nil
+    end
+    for i = 1, #self.tiers do
+        if numZombies >= self.tiers[i][1] and numZombies <= self.tiers[i][2] then
+            return i
+        end
+    end
+    if numZombies < self.minMaxTiers[1] then
+        return 1
+    elseif numZombies > self.minMaxTiers[2] then
+        return #self.tiers
+    end
+end
+
+function RicksMLC_VendingMachineConfig:GetRandomPrize(numZombies)
+    -- Returns: Name of the item to spawn
+
+    local tierNum = self:CalcTierNum(numZombies)
+    if not tierNum then return end
+
+    if #self.prizes[tierNum] == 0 then
+        DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() Error - no prizes in tier " .. tostring(tierNum))
         return
     end
-    local rnd = ZombRand(1, #self.prizes+1)
+    local rnd = ZombRand(1, #self.prizes[tierNum]+1)
     --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() " .. tostring(rnd))
-    return self.prizes[rnd]
+    return self.prizes[tierNum][rnd]
 end
 
 -----
@@ -300,10 +391,20 @@ function RicksMLC_Spawn.RemoveDogTags(invPage, zedName, itemList)
     end
 end
 
-function RicksMLC_Spawn.AddPrize(invPage)
-    --local type = "Acorn"
-    local type = RicksMLC_VendingMachineConfig.Instance():GetRandomPrize()
-    local prize = InventoryItemFactory.CreateItem(type)
+function RicksMLC_Spawn.AddPrize(invPage, numZombies)
+    local prizeType = RicksMLC_VendingMachineConfig.Instance():GetRandomPrize(numZombies)
+    local prize = nil
+    if type(prizeType) == "string" then
+        -- Check for special container item
+        local container = RicksMLC_VendingMachineConfig.Instance().containers[prizeType]
+        if container then
+            prize = container
+        else
+            prize = InventoryItemFactory.CreateItem(prizeType)
+        end
+    else
+        prize = prizeType
+    end
     local vendingMachineItemContainer = invPage.inventoryPane.inventory
     local vendingMachine = vendingMachineItemContainer:getParent()
     local time = 100
@@ -317,9 +418,9 @@ function RicksMLC_Spawn.ParseDogTag(fullName)
     return {zedName..zedCount, tonumber(zedCount), tonumber(zedId)}
 end
 
-function RicksMLC_Spawn.QueueClaimPrizeActions(invPage, zomName, itemList)
+function RicksMLC_Spawn.QueueClaimPrizeActions(invPage, zomName, numZombies, itemList)
     RicksMLC_Spawn.RemoveDogTags(invPage, zomName, itemList)
-    RicksMLC_Spawn.AddPrize(invPage)
+    RicksMLC_Spawn.AddPrize(invPage, numZombies)
 end
 
 local spawnName = 1
@@ -349,14 +450,14 @@ function RicksMLC_Spawn:CashIn()
         for j = 1, v[1] do
             -- Read each in sequence.  Any missed seqence fails test.
             if not v[2][j] then
-                DebugLog.log(DebugType.Mod, " Fail.  Missing #" .. tostring(j))
+                --DebugLog.log(DebugType.Mod, " Fail.  Missing #" .. tostring(j))
                 allZedsAccounted = false
                 break
             end
         end
         if allZedsAccounted then
             -- We have a winner.
-            RicksMLC_Spawn.QueueClaimPrizeActions(self, zomName, v[2])
+            RicksMLC_Spawn.QueueClaimPrizeActions(self, zomName, v[1], v[2])
         end
     end
 end
@@ -417,12 +518,6 @@ function RicksMLC_Spawn.isMaleOutfit(outfit)
 end
 
 function RicksMLC_Spawn.Init()
+    DebugLog.log(DebugType.Mod, "RicksMLC_Spawn.Init()")
     RicksMLC_Spawn.CacheOutfits()
-
-    local filename = "VendingConfig.txt"
-    local chatScriptFile = RicksMLC_ChatIO:new(RicksMLC_AdHocCmds.GetModName(), RicksMLC_AdHocCmds.GetZomboidPath() .. filename)
-    RicksMLC_AdHocCmds.Instance():ScriptFactory(chatScriptFile, immediate, filename)
-    RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
 end
-
-Events.OnGameStart.Add(RicksMLC_Spawn.Init)

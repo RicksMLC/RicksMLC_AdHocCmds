@@ -21,11 +21,20 @@ end
 
 function RicksMLC_ChatSupplyConfig:Update(configFile)
     DebugLog.log(DebugType.Mod, "RicksMLC_ChatSuppliesConfig:Update() " .. type(self.supplies))
+    local i = 1
+    self.supplies = {} -- Clear all existing supplies.
     for key, value in pairs(configFile.contentList) do
         if key ~= "type" and value then
             --DebugLog.log(DebugType.Mod, "  key: '" .. key .. "' value: '" .. value .. "'")
+            self.supplies[key] = {}
             local supplyList = RicksMLC_Utils.SplitStr(value, ",")
-            self.supplies[key] = supplyList
+            for i, itemName in ipairs(supplyList) do
+                -- Verify the item exists and only add if found.  This is to handle configurations which include mod items
+                local item = InventoryItemFactory.CreateItem(itemName)
+                if item then
+                    self.supplies[key][#self.supplies[key]+1] = itemName
+                end
+            end
         end
     end
 end
@@ -35,20 +44,9 @@ function RicksMLC_ChatSupplyConfig:GetRandomSupply(category)
     if not prizes then return nil end
 
     local rnd = ZombRand(1, #prizes+1)
-    DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupplyConfig:GetRandomSupply() " .. tostring(rnd))
+    --DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupplyConfig:GetRandomSupply() " .. tostring(rnd))
     return prizes[rnd]
 end
-
-function RicksMLC_ChatSupplyConfig.Init()
-    RicksMLC_ChatSupplyConfigInstance = RicksMLC_ChatSupplyConfig:new()
-
-    local filename = "ChatSupplyConfig.txt"
-    local chatScriptFile = RicksMLC_ChatIO:new(RicksMLC_AdHocCmds.GetModName(), RicksMLC_AdHocCmds.GetZomboidPath() .. filename)
-    RicksMLC_AdHocCmds.Instance():ScriptFactory(chatScriptFile, immediate, filename)
-    RicksMLC_ChatSupplyConfig.Instance():Update(chatScriptFile)
-end
-
-Events.OnGameStart.Add(RicksMLC_ChatSupplyConfig.Init)
 
 ------------------------------------------------------------------------------------
 
@@ -73,9 +71,11 @@ function RicksMLC_ChatSupply:Supply(contentList)
             if item then
                 getPlayer():getInventory():AddItem(item)
                 RicksMLC_Utils.Think(getPlayer(), "Oh look.  I had a " .. item:getDisplayName() .. " in my shoe the whole time", 1)
+            else
+                RicksMLC_Utils.Think(getPlayer(), "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
             end
         else
-            RicksMLC_Utils.Think(getPlayer(), "No item returned for category '" .. category .. "'", 3)
+            RicksMLC_Utils.Think(getPlayer(), "No items for category '" .. category .. "' (maybe a typo or missing mod item)", 3)
         end
     else
         RicksMLC_Utils.Think(getPlayer(), "I don't understand what should be in my shoe", 3)

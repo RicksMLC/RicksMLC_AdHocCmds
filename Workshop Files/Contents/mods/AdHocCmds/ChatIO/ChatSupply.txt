@@ -1,5 +1,6 @@
 -- Chat Supply File.
---  Set the category to one of the keys in the ChatSuppliesConfig.txt file.
+--  Set the category to one of the keys in the ChatSupplyConfig.txt file 
+--  to give a random item from that category to the player.
 
 type=chatsupply
 category=food

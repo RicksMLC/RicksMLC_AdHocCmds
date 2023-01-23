@@ -1,7 +1,32 @@
-ChatPot.txt=hourly
+-- chatInput.txt : Triggers the AdHocCmds to action the control/command files.
+--
+-- It is strongly recommended you back up any customised files before updating this mod, as updating this mod
+-- may remove the custom files from the ChatIO directory.
+--
+-- Usage:
+--      This "chatInput.txt" file name is hard-coded in the mod, and is the only real-time control file for the mod.
+--      Note there is a boot.txt file which has the same format as this chatInput.txt file, but it is
+--      only read once on startup, and the boot.txt lines are not commented out automatically.
+--
+--      Any uncommented filename listed below will be actioned by the mod.  This chatInput.txt file is
+--      triggered by either pressing the <F10> key or waiting to be automatically read evey 10 in-game minutes.
+--      
+--      A file listed below can be either declared as "hourly" or "immediate".  The "hourly" files are read and 
+--      actioned on the hour, and are primarily for broadcasting a regular message on Radio C.H.A.T.  The "immediate"
+--      files are actioned once and then automatically commented out so they are not repeated.
+--      
+-- Input file types: An input file can have one of the following types:
+--      radioscript         Script lines to broadcast on Radio C.H.A.T.
+--      weather             Trigger a weather event (eg start/stop a tropical storm)
+--      spawn               Spawn zombies with named dogtags
+--      vendingconfig       Configure the Vending Machine prizes for cashing in dogtags
+--      chatsupplyconfig    Configure the chat supply items to the player inventory.
+--      chatsupply          Trigger supplying an item to the player inventory from the categories defined in chatsupplyconfig.
+
+--ChatPot.txt=hourly
 --WeatherGod.txt=immediate
 --WASDControl.txt=immediate
 --SpawnZeds.txt=immediate
-VendingConfig.txt=immediate
-ChatSupplyConfig.txt=immediate
+--VendingConfig.txt=immediate
+--ChatSupplyConfig.txt=immediate
 --ChatSupply.txt=immediate
