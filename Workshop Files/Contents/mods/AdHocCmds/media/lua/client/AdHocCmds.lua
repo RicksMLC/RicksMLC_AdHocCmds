@@ -124,19 +124,24 @@ function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll, ctrlFilePath)
 	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:LoadChatIOFiles() " .. RicksMLC_CtrlFilePath )
 	self.ChatIO_CtrlFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ctrlFilePath)
 	self.ChatIO_CtrlFile:Load("=", isForceReadAll) 	-- Read the list of chat files to read
-	if ctrlFilePath ~= RicksMLC_CtrlBootFilePath then
-		self.ChatIO_CtrlFile:Save("=", true)			-- Comment out the control file contents 
-	end
 
 	-- Load each file from the control file and perform their commands
 	local chatFiles = {}
 	for k, v in pairs(self.ChatIO_CtrlFile.contentList) do
 		chatFiles[k] = v
 	end
+	local isApplied = false
 	for filename, schedule in pairs(chatFiles) do
 		local chatScriptFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ZomboidPath .. filename)
 		-- TODO: Add test for misspelt chat file name in chatInput.txt EG: WASDCtrl.txt
-		self:ScriptFactory(chatScriptFile, schedule, filename)
+		isApplied = self:ScriptFactory(chatScriptFile, schedule, filename)
+	end
+
+	-- If any chatfiles were applied update the control file to comment out the exected files.
+	if isApplied then
+		if ctrlFilePath ~= RicksMLC_CtrlBootFilePath then
+			self.ChatIO_CtrlFile:Save("=", true)			-- Comment out the control file contents 
+		end
 	end
 end
 
@@ -162,12 +167,14 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		else
 			DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory() Error: " .. filename .. ": unknown schedule '" .. schedule .. "'")
 		end
+		return true
 	elseif scriptType == "weather" then
 		-- Create the new weather ctrl object to initiate
 		local wScript = RicksMLC_WeatherScript:new()
 		wScript:AddLines(chatScriptFile.contentList)
 		wScript:UpdateValues(chatScriptFile.contentList)
 		self.weather = wScript
+		return true
 		--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory() TEST BROADCAST IMMEDIATE")
 		-- TODO: Schedule. Just broadcast it for now as a test
 		--self.weather:Broadcast()
@@ -176,14 +183,19 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		spawnScript:Spawn(chatScriptFile.contentList)
 		spawnScript:AddLines(chatScriptFile.contentList)
 		spawnScript:Broadcast()
+		return true
 	elseif scriptType == "vendingconfig" then
 		RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
+		return true
 	elseif scriptType == "chatsupplyconfig" then
 		RicksMLC_ChatSupplyConfig.Instance():Update(chatScriptFile)
+		return true
 	elseif scriptType == "chatsupply" then
 		local supplyScript = RicksMLC_ChatSupply:new(chatScriptFile)
 		supplyScript:Supply()
+		return true
 	end
+	return false
 end
 
 function RicksMLC_AdHocCmds:HandleEveryTenMinutes()
@@ -333,10 +345,11 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 end
 
 function RicksMLC_AdHocCmds.OnGameStart()
-    --DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnCreatePlayer(): ")
+    DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnGameStart(): ")
 	if isServer() then return end
 
 	RicksMLC_Spawn.Init()
+	--RicksMLC_PostDeath.Init()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
 end

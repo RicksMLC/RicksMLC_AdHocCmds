@@ -43,6 +43,21 @@
 
 type=vendingconfig
 
+-- Cash Ins available - Set this value to cause an automatic revert to the given config after this number of cash ins.
+-- Leave blank (ie "cashIns=") so this config is the default config, and does not expire.
+cashIns=
+
+-- Set tooltip on/off
+tooltips=off
+-- Set the name of the chatter responsible for this vending machine config.  Leave blank to not show a name.
+tooltipChatName=
+
+-- Vending Machine Real Sounds = attract zombies.  Good luck!
+dogTagCashInSoundRadius=10
+dogTagCashInSoundVolume=1
+dispensePrizeSoundRadius=20
+dispelsePrizeSoundRadius=5
+
 -- Definition of "container" special items (Format: containerN=PrizeName,ContainerItem,item[,item...])
 container1=SackOfNuts,EmptySandbag,Acorn,Acorn
 container2=SewingKitFull,SewingKit,Scissors,Needle,Thread

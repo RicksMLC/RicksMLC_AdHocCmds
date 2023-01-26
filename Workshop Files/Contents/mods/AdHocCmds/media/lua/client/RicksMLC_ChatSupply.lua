@@ -43,7 +43,7 @@ function RicksMLC_ChatSupplyConfig:GetRandomSupply(category)
     local prizes = self.supplies[category]
     if not prizes then return nil end
 
-    local rnd = ZombRand(1, #prizes+1)
+    local rnd = PZMath.roundToInt(ZombRand(1, #prizes+1))
     --DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupplyConfig:GetRandomSupply() " .. tostring(rnd))
     return prizes[rnd]
 end

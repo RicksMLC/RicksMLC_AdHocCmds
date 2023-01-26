@@ -4,14 +4,14 @@ description= Chat integration tool to allow chat to interact with the player.
 description= [b]WARNING: THIS MOD IS UNDER CONSTRUCTION - Ie: Not Finished Yet[/b]  (but works for some definintion of "works") 
 description= 
 description= This tool uses .txt files to update control and trigger actions in the game.
-description- One of the main purposes is to facilitate the interaction between streamer chat (ie Twitch or Youtube etc)
+description= One of the main purposes of this mod is to facilitate the interaction between streamer chat (ie Twitch or Youtube etc)
 description= and the running PZ game by using something like TouchPortal to read the chat interaction
 description= and update the ChatIO files in real-time to interact with the streamer's game.
 description=
 description= Features: [list]
 description= [*] Spawn Zombies near the player (Spawned zombies have custom dogtags)
-description= [*] Radio C.H.A.T (106.8MHz) - chat can say things over on a radio in-game 
-description= [*] Toggle weather events
+description= [*] Radio C.H.A.T (106.8MHz) - chat messages will appear on radios in-game 
+description= [*] Toggle weather events ie:storms
 description= [*] Chat can supply items to the player inventory
 description= [*] The player can cash in dogtags at Vending Machines for prizes (no refunds)
 description= [*] All features listed above are configurable in the text files in the  /ChatIO/ directory of the mod.

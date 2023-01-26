@@ -26,7 +26,7 @@ function RicksMLC_ChatIO:new(modName, saveFilePath)
 end
 
 function RicksMLC_ChatIO:Save(delim, isCommentOut)
-	--DebugLog.log(DebugType.Mod, "RicksMLC_ChatIO:Save()")
+	--DebugLog.log(DebugType.Mod, "RicksMLC_ChatIO:Save()" .. self.saveFilePath)
 	local luaFileWriter = getModFileWriter(self.modName, self.saveFilePath, true, false) 
 	-- Looks like args are: getModFileWriter(modName, path, isCreateNew, isAppend)
 	local commentOutString = ""
@@ -38,9 +38,14 @@ function RicksMLC_ChatIO:Save(delim, isCommentOut)
         if type(value) == "table" then
             line = line .. delim .. table.concat(value, ",")
         else
-            line = line .. delim .. value
+			if value ~= nil then
+				--DebugLog.log(DebugType.Mod, "key: '" .. tostring(key) .. "' delim '" .. tostring(delim) .. "' value: " .. (value or "nil"))
+            	line = line .. delim .. value
+			else
+				line = line .. delim
+			end
         end
-		if line:find("hourly") == nil then
+		if isCommentOut and line:find("hourly") == nil then
 			line = commentOutSring .. line
 		end
         luaFileWriter:writeln(line)
