@@ -1,4 +1,4 @@
---boot.txt - This is loaded once at start up to initilise the vending and chat supply components.
+--boot.txt - This is loaded once at start up to initialise the vending and chat supply components.
 --
 -- First Time Instruction:
 --   The default config files below are the default ones that come with this mod.

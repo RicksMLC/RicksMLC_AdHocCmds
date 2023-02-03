@@ -48,7 +48,7 @@ type=vendingconfig
 cashIns=
 
 -- Set tooltip on/off
-tooltips=off
+tooltips=on
 -- Set the name of the chatter responsible for this vending machine config.  Leave blank to not show a name.
 tooltipChatName=
 
@@ -62,6 +62,8 @@ dispelsePrizeSoundRadius=5
 container1=SackOfNuts,EmptySandbag,Acorn,Acorn
 container2=SewingKitFull,SewingKit,Scissors,Needle,Thread
 
+-- Tiers to decide which prize based on the number of zombies.  eg tier1=1-4 is for number of zombies between 1 and 4 inclusive.
+-- Note: Each tier must have a lower and upper bound.  They can be the same number eg tier5=21-21 so tier5 is for 21 zombies exactly.
 tier1=1-4
 tier2=5-9
 tier3=10-14

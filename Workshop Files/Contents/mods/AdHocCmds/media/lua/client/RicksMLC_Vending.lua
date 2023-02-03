@@ -353,7 +353,7 @@ function RicksMLC_Vending.ParseDogTag(fullName)
     return {zedName..zedCount, tonumber(zedCount), tonumber(zedId)}
 end
 
-function RicksMLC_Vending.QueueClaimPrizeActions(invPage, zomName, numZombies, itemList)
+function RicksMLC_Vending.ClaimPrizeActions(invPage, zomName, numZombies, itemList)
     RicksMLC_Vending.RemoveDogTags(invPage, zomName, itemList)
     RicksMLC_Vending.AddPrize(invPage, numZombies)
 end
@@ -392,7 +392,7 @@ function RicksMLC_Vending:CashInButtonPress()
         end
         if allZedsAccounted then
             -- We have a winner.
-            RicksMLC_Vending.QueueClaimPrizeActions(self, zomName, v[1], v[2])
+            RicksMLC_Vending.ClaimPrizeActions(self, zomName, v[1], v[2])
         end
     end
 end

@@ -1,9 +1,6 @@
 Sandbox_EN = {
-    Sandbox_RicksMLC_Concussion = "Rick's MLC Concussion",
+    Sandbox_RicksMLC_AdHocCmds = "Rick's MLC AdHocCmds",
 
-    Sandbox_RicksMLC_Concussion_ConcussionEffectTime = "Effect Time (seconds)",
-    Sandbox_RicksMLC_Concussion_ConcussionEffectTime_tooltip = "How long the effect lasts in seconds",
-
-    Sandbox_RicksMLC_Concussion_ThoughtsOn = "See Thoughts",
-    Sandbox_RicksMLC_Concussion_ThoughtsOn_tooltip = "Turn on/off thoughts when concussed"
+    Sandbox_RicksMLC_AdHocCmds_RememberZombieNames = "Remember Zombie Names"
+    Sandbox_RicksMLC_AdHocCmds_RememberZombieNames_tooltip = "Turn off if performance is an issue with too many named zombies"
 }

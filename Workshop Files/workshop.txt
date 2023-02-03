@@ -1,11 +1,10 @@
 version=0.9
-title=Rick's MLC AdHocCmds
-description= Chat integration tool to allow chat to interact with the player.
-description= [b]WARNING: THIS MOD IS UNDER CONSTRUCTION - Ie: Not Finished Yet[/b]  (but works for some definintion of "works") 
+title=Rick's MLC AdHocCmds (Twitch/YouTube chat interaction)
+description= Chat integration tool to allow chat to interact with the player if you have TouchPortal. 
 description= 
 description= This tool uses .txt files to update control and trigger actions in the game.
-description= One of the main purposes of this mod is to facilitate the interaction between streamer chat (ie Twitch or Youtube etc)
-description= and the running PZ game by using something like TouchPortal to read the chat interaction
+description= One of the main purposes of this mod is to facilitate the interaction between streamer chat (eg Twitch or YouTube)
+description= and the running PZ game by using TouchPortal (or equivalent) to read the chat interaction
 description= and update the ChatIO files in real-time to interact with the streamer's game.
 description=
 description= Features: [list]

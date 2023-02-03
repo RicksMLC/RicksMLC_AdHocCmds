@@ -349,7 +349,7 @@ function RicksMLC_AdHocCmds.OnGameStart()
 	if isServer() then return end
 
 	RicksMLC_Spawn.Init()
-	--RicksMLC_PostDeath.Init()
+	RicksMLC_PostDeath.Init()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
 end

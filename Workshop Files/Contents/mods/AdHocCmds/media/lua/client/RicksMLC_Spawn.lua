@@ -125,7 +125,7 @@ function RicksMLC_Spawn:SetZombieDogtag(zombie, zId, numZombies)
     dogtag:setCustomName(true)
     zombie:addItemToSpawnAtDeath(dogtag)
     local zModData = zombie:getModData()
-    zModData["RicksMLC_Spawn"] = {self.spawner, numZombies, zId}
+    zModData["RicksMLC_Spawn"] = {self.spawner, numZombies, zId, zombie.ZombieID}
 end
 
 function RicksMLC_Spawn:Spawn(paramList)
@@ -144,6 +144,8 @@ function RicksMLC_Spawn:Spawn(paramList)
         self:SetZombieDogtag(zombie, zId, numZombies)
 		zId = zId + 1
 	end
+    -- Record the zombie in the spawnstats for collecting wounds
+    RicksMLC_SpawnStats:Instance():AddZombies(self.spawner, fullZombieList)
 end
 
 function RicksMLC_Spawn:WriteOutfits()
