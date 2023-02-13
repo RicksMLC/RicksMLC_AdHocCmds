@@ -1,11 +1,16 @@
 -- Vending Machine handling
 
 require "ISBasObject"
+require "TimedActions/ISTimedActionQueue"
 
 RicksMLC_VendingMachineConfig = ISBaseObject:derive("RicksMLC_VendingMachineConfig")
 
 RicksMLC_VendingConfigInstance = nil
 function RicksMLC_VendingMachineConfig.Instance()
+    if isClient() then
+        -- TODO: Call the server
+    end
+
     if not RicksMLC_VendingConfigInstance then
         RicksMLC_VendingConfigInstance = RicksMLC_VendingMachineConfig:new()
     end
@@ -226,7 +231,7 @@ function ISCashInDogTagAction:perform()
 	self.character:stopOrTriggerSound(self.sound)
     local vendingMachineConfigInst = RicksMLC_VendingMachineConfig:Instance()
 
-    if vendingMachineConfigInst.dogTagCashInRadius and vendingMachineConfigInst.dogTagCashInRadius then
+    if vendingMachineConfigInst.dogTagCashInRadius and vendingMachineConfigInst.dogTagCashInVolume then
         addSound(self.vendingMachine,
                  self.vendingMachine:getX(), 
                  self.vendingMachine:getY(), 
@@ -399,14 +404,15 @@ end
 
 function RicksMLC_Vending.UpdateVendingMachineTooltips()
     -- Update the vending machine inventory display page, just in case the player can see it when the tooltip changes.
-    local currentLootInventory = getPlayerLoot(getPlayer():getPlayerNum()) -- this is really a InventoryPage?
+    local currentLootInventory = getPlayerLoot(getPlayer():getPlayerNum()) -- this is really an InventoryPage?
     if currentLootInventory then
         RicksMLC_Vending.UpdateCashInTooltip(currentLootInventory)
     end
 end
 
-
 function RicksMLC_Vending.UpdateCashInTooltip(invPage)
+    if not invPage.cashIn then return end -- The cash in button may not have been created yet
+
     if not RicksMLC_VendingMachineConfig.Instance().tooltipsOn then
         invPage.cashIn.tooltip = nil 
         return
@@ -421,23 +427,21 @@ function RicksMLC_Vending.UpdateCashInTooltip(invPage)
 end
 
 function RicksMLC_Vending.AddCashInButtonIfNeeded(invPage)
-    if invPage.cashIn then 
-        RicksMLC_Vending.UpdateCashInTooltip(invPage)
-        return
-    end
-
+    if not invPage.cashIn then 
     invPage.cashIn = ISButton:new(invPage.lootAll:getRight() + 16, 0, 50, invPage:titleBarHeight(), getText("IGUI_RicksMLC_Vending_CashIn"), invPage, RicksMLC_Vending.CashInButtonPress);
-    invPage.cashIn:initialise();
-    invPage.cashIn.borderColor.a = 0.0;
-    invPage.cashIn.backgroundColor.a = 0.0;
-    invPage.cashIn.backgroundColorMouseOver.a = 0.7;
-    invPage:addChild(invPage.cashIn);
-    invPage.cashIn:setVisible(false);
+        invPage.cashIn:initialise()
+        invPage.cashIn.borderColor.a = 0.0
+        invPage.cashIn.backgroundColor.a = 0.0
+        invPage.cashIn.backgroundColorMouseOver.a = 0.7
+        invPage:addChild(invPage.cashIn)
+        invPage.cashIn:setVisible(false)
+    end
+    RicksMLC_Vending.UpdateCashInTooltip(invPage)
 end
 
 function RicksMLC_Vending.OnRefreshInventoryWindowContainers(invPage, state)
 	-- ISInventoryPage invPage, string State
-	if state == "buttonsAdded" then
+	if state == "end" then
     	--DebugLog.log(DebugType.Mod, "RicksMLC_Scratch.OnRefreshInventoryWindowContainers() buttonsAdded state")
         -- invPage has an "inventory" which is really an ItemContainer
         -- invPage.inventory.type == "vendingpop", but what about other vending machines? Maybe use title anyway
@@ -452,4 +456,16 @@ function RicksMLC_Vending.OnRefreshInventoryWindowContainers(invPage, state)
    	end
 end
 
+function RicksMLC_Vending.OnGameStart()
+    -- TODO: Needs a VendingConfig server
+    if isServer() then
+        DebugLog.log(DebugType.Mod, "RicksMLC_Vending.OnGameStart() Server")
+    elseif isClient() then
+        DebugLog.log(DebugType.Mod, "RicksMLC_Vending.OnGameStart() Client")
+    else
+        DebugLog.log(DebugType.Mod, "RicksMLC_Vending.OnGameStart() stand-alone")
+    end
+end
+
 Events.OnRefreshInventoryWindowContainers.Add(RicksMLC_Vending.OnRefreshInventoryWindowContainers)
+Events.OnGameStart.Add(RicksMLC_Vending.OnGameStart)

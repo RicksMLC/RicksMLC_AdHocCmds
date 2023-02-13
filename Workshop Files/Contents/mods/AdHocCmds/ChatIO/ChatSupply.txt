@@ -1,6 +1,11 @@
 -- Chat Supply File.
 --  Set the category to one of the keys in the ChatSupplyConfig.txt file 
 --  to give a random item from that category to the player.
+-- In single player, leave "player=" without a name
+-- In multiplayer if "player=" does not have a name, the streamer will get the goods.
+-- If "player=" is set to the username of the player, that player will get the goods.
+-- If the "player=" is not a username in the multiplayer server, no one will get it, and an error logged.
 
 type=chatsupply
 category=food
+player=

@@ -64,21 +64,36 @@ end
 
 function RicksMLC_ChatSupply:Supply(contentList)
     local category = self.supplyFile:Get("category")
+    local playerName = self.supplyFile:Get("player")
+    if playerName then
+        player = getPlayerFromUsername(playerName)
+        if not player then
+            RicksMLC_Utils.Think(getPlayer(), "Weird? Chat sent supplies to '" .. playerName .. "' but I don't know who that is.", 3)
+            DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply: Error: player username '" .. playerName .. "' not found.  Current users:")
+            local playerList = getOnlinePlayers()
+            for i = 0, playerList:size()-1 do
+                DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "'")
+            end
+            return
+        end
+    else
+        player = getPlayer()
+    end
     if category then
         local itemType = RicksMLC_ChatSupplyConfig.Instance():GetRandomSupply(category)
         if itemType then
             local item = InventoryItemFactory.CreateItem(itemType)
             if item then
-                getPlayer():getInventory():AddItem(item)
-                RicksMLC_Utils.Think(getPlayer(), "Oh look.  I had a " .. item:getDisplayName() .. " in my shoe the whole time", 1)
+                player:getInventory():AddItem(item)
+                RicksMLC_Utils.Think(player, "Oh look.  I had a " .. item:getDisplayName() .. " in my shoe the whole time", 1)
             else
-                RicksMLC_Utils.Think(getPlayer(), "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
+                RicksMLC_Utils.Think(player, "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
             end
         else
-            RicksMLC_Utils.Think(getPlayer(), "No items for category '" .. category .. "' (maybe a typo or missing mod item)", 3)
+            RicksMLC_Utils.Think(player, "No items for category '" .. category .. "' (maybe a typo or missing mod item)", 3)
         end
     else
-        RicksMLC_Utils.Think(getPlayer(), "I don't understand what should be in my shoe", 3)
+        RicksMLC_Utils.Think(player, "I don't understand what should be in my shoe", 3)
     end
 end
 

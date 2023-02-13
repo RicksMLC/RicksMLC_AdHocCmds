@@ -1,6 +1,6 @@
--- Rick's MLC Template
+-- Rick's MLC AdHocCmds - Twitch streaming interface if you have TouchPortal or something like that
 -- TODO:
---		 [ ] Use the radio to report changes caused by "Unusual Unknown Circumstances"
+--		 [+] Use the radio to report changes caused by "Unusual Unknown Circumstances"
 --				Chaos Happens At Times - C.H.A.T. Radio
 
 -- Note: https://projectzomboid.com/modding/index.html
@@ -37,6 +37,8 @@ function RicksMLC_AdHocCmds:new()
 	o.radioScriptsHourly = {}
 
 	o.isStorming = false
+
+	o.skipFirstTen = true -- Skip the first 10 minute timer to prevent early spawns
 
     return o
 end
@@ -134,7 +136,7 @@ function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll, ctrlFilePath)
 	for filename, schedule in pairs(chatFiles) do
 		local chatScriptFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ZomboidPath .. filename)
 		-- TODO: Add test for misspelt chat file name in chatInput.txt EG: WASDCtrl.txt
-		isApplied = self:ScriptFactory(chatScriptFile, schedule, filename)
+		isApplied = self:ScriptFactory(chatScriptFile, schedule, filename) or isApplied
 	end
 
 	-- If any chatfiles were applied update the control file to comment out the exected files.
@@ -199,6 +201,11 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 end
 
 function RicksMLC_AdHocCmds:HandleEveryTenMinutes()
+	if self.skipFirstTen then
+		self.skipFirstTen = false
+		return
+	end
+
 	self:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 end
 
@@ -337,6 +344,13 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 		elseif key == Keyboard.KEY_F10 then
 			-- Forces load of all chatInput.txt file
 			--local startTime = getTimeInMillis()
+			if isServer() then
+				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed server")
+			elseif isClient() then
+				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed client")
+			else
+				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed stand-alone")
+			end
 			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 			--local endTime = getTimeInMillis()
     		--DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed Time: " .. tostring(endTime - startTime) .. "ms")
@@ -346,16 +360,25 @@ end
 
 function RicksMLC_AdHocCmds.OnGameStart()
     DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnGameStart(): ")
-	if isServer() then return end
+	if isServer() then 
+		DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnGameStart(): isServer() == true")
+		return
+	end
+	if isClient() then
+		DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnGameStart(): isClient() == true")
+	end
 
 	RicksMLC_Spawn.Init()
 	RicksMLC_PostDeath.Init()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
+	RicksMLC_Radio.Init()
+
+	Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
+	Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
+	Events.EveryTenMinutes.Add(RicksMLC_AdHocCmds.EveryTenMinutes)
+	Events.EveryHours.Add(RicksMLC_AdHocCmds.EveryHours)
+
 end
 
 Events.OnGameStart.Add(RicksMLC_AdHocCmds.OnGameStart)
-Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
-Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
-Events.EveryTenMinutes.Add(RicksMLC_AdHocCmds.EveryTenMinutes)
-Events.EveryHours.Add(RicksMLC_AdHocCmds.EveryHours)

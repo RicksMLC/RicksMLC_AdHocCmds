@@ -22,6 +22,7 @@ function RicksMLC_SpawnStats:new()
     o.wounds["bitten"] = {}
     o.wounds["cut"] = {}
     o.wounds["scratched"] = {}
+    o.wounds["deepWounded"] = {}
     return o
 end
 
@@ -30,6 +31,7 @@ function RicksMLC_SpawnStats:ResetWounds()
     self.wounds["bitten"] = {}
     self.wounds["cut"] = {}
     self.wounds["scratched"] = {}
+    self.wounds["deepWounded"] = {}
     for i = 1, #self.spawners do
         self.spawners[i][2] = {}
     end
@@ -72,6 +74,10 @@ end
 
 function RicksMLC_SpawnStats:RecordWound(zombieId, woundType)
     local spawnerIdx = self.spawnedZombies[zombieId]
+    if not spawnerIdx then
+        --FIXME: Check if this is a player?
+
+    end
     if spawnerIdx then
         if self.spawners[spawnerIdx][2][woundType] then
             self.spawners[spawnerIdx][2][woundType] = self.spawners[spawnerIdx][2][woundType] + 1
@@ -193,6 +199,13 @@ function RicksMLC_PostDeath.OnPostDeath(playerObj)
                 table.insert(panel.lines, "   " .. inflictors[1] .. " x " .. tostring(inflictors[2]))
             end
         end
+        if #lines["deepWounded"] > 0 then
+            table.insert(panel.lines, "_____________________________________")
+            table.insert(panel.lines, "Deep Wounders:                                                           ")
+            for key, inflictors in pairs(lines["deepWounded"]) do
+                table.insert(panel.lines, "   " .. inflictors[1] .. " x " .. tostring(inflictors[2]))
+            end
+        end
     end
   
 end
@@ -209,7 +222,7 @@ function RicksMLC_PostDeath:RecordNewWound(bodyPartType, zombieId, woundId, woun
     end
 end
 
-function RicksMLC_PostDeath:RecordNewWounds(bodyPartType, isBitten, isCut, isScratched, zombieId)
+function RicksMLC_PostDeath:RecordNewWounds(bodyPartType, isBitten, isCut, isScratched, isDeepWounded, zombieId)
     -- TODO: Detect Infection
     if isBitten then
         self:RecordNewWound(bodyPartType, zombieId, 1, "bitten")
@@ -219,6 +232,9 @@ function RicksMLC_PostDeath:RecordNewWounds(bodyPartType, isBitten, isCut, isScr
     end
     if isScratched then
         self:RecordNewWound(bodyPartType, zombieId, 3, "scratched")
+    end
+    if isDeepWounded then
+        self:RecordNewWound(bodyPartType, zombieId, 4, "deepWounded")
     end
 end
 
@@ -234,6 +250,7 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
     --  Player: IdleState(?) -> PlayerHitReactionState
     if newStateName == "PlayerHitReactionState" then
         local attacker = character:getAttackedBy() -- make sure this is a zombie, and not another player?
+        -- FIXME: Remove when players can wound other players
         if not attacker:isZombie() then return end
 
         local zModData = attacker:getModData()
@@ -252,6 +269,7 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
                 bodyDamage:IsBitten(bodyPartType),
                 bodyDamage:IsCut(bodyPartType),
                 bodyDamage:IsScratched(bodyPartType),
+                bodyDamage:IsDeepWounded(bodyPartType),
                 attacker:getUID())
         end
         --RicksMLC_SpawnStats:Instance():Dump()
@@ -262,7 +280,7 @@ function RicksMLC_PostDeath.OnAIStateChange(character, newState, oldState)
     -- Make sure this event is for the player, otherwise on multiplayer everyone gets concussed
 
     -- Return if this is a dedicated server.
-    if isServer() and not isClient() then return end
+    if isServer() then return end
 
     if RicksMLC_PostDeathInstance then
         RicksMLC_PostDeathInstance:HandleOnAIStateChange(character, newState, oldState)
@@ -276,7 +294,7 @@ end
 
 local eventsOn = nil
 function RicksMLC_PostDeath.Init()
-    if not isClient() then 
+    if not isServer() then 
         DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath.Init()")
         RicksMLC_PostDeathInstance = RicksMLC_PostDeath:new()
         RicksMLC_SpawnStatsInstance = RicksMLC_SpawnStats:new()
@@ -284,6 +302,7 @@ function RicksMLC_PostDeath.Init()
         if not eventsOn and SandboxVars.RicksMLC_AdHocCmds.RememberZombieNames then
             Events.OnAIStateChange.Add(RicksMLC_PostDeath.OnAIStateChange)
             Events.OnPlayerDeath.Add(RicksMLC_PostDeath.OnPostDeath)
+            -- Comment out for release.  Keypress is for testing only:
             --Events.OnKeyPressed.Add(RicksMLC_PostDeath.OnKeyPressed)
             Events.OnCreatePlayer.Add(RicksMLC_PostDeath.OnCreatePlayer)
             eventsOn = true
