@@ -10,7 +10,6 @@
 require "ISBaseObject"
 require "RicksMLC_ChatIO"
 require "RicksMLC_Radio"
-require "ISSpawnHordeUI"
 require "RicksMLC_ChatSupply"
 
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");

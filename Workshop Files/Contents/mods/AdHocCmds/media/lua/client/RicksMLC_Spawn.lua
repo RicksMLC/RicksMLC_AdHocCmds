@@ -7,13 +7,11 @@
 --  [ ] Use the map?
 --  [ ] HeliSpawn?
 
-require "ISInventoryPage"
+require "ISUI/ISInventoryPage"
 require "ISBaseObject"
 require "RicksMLC_Utils"
 require "RicksMLC_AdHocCmds"
 require "RicksMLC_ChatIO"
-require "RicksMLC_ChatScriptFile"
-
 
 RicksMLC_Spawn = RicksMLC_ChatScriptFile:derive("RicksMLC_Spawn");
 function RicksMLC_Spawn:new(spawnFile)
@@ -54,10 +52,11 @@ function RicksMLC_Spawn:EndTimerCallback(retryNum)
         end
     end
     if zombieList:size() == 0 then
-        if retryNum > 40 then
-            -- Abort if over 40 retries
-            timeout = getTimeInMillis() - self.startTime
+        local timeout = getTimeInMillis() - self.startTime
+        if timeout > 10000 then
+            -- Abort if over timeout (10 seconds)
             DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:EndTimerCallback() Abort.  Tries:" .. tostring(retryNum) .. " Time: " .. tostring(timeout) .."ms")
+            RicksMLC_Utils.Think(getPlayer(), "Zombie Spawn Timeout for " .. tostring(self.spawner) .. "'s zombies - sorry. Timeout " .. tostring(timeout) .."ms", 3)
             return true
         end
         return false

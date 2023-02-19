@@ -1,6 +1,6 @@
 -- Vending Machine handling
 
-require "ISBasObject"
+require "ISBaseObject"
 require "TimedActions/ISTimedActionQueue"
 
 RicksMLC_VendingMachineConfig = ISBaseObject:derive("RicksMLC_VendingMachineConfig")
