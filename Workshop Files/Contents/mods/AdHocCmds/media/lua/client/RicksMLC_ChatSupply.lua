@@ -66,19 +66,13 @@ function RicksMLC_ChatSupply:Supply(contentList)
     local category = self.supplyFile:Get("category")
     local playerName = self.supplyFile:Get("player")
     if playerName then
-        player = getPlayerFromUsername(playerName)
-        if not player then
-            RicksMLC_Utils.Think(getPlayer(), "Weird? Chat sent supplies to '" .. playerName .. "' but I don't know who that is.", 3)
-            DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply: Error: player username '" .. playerName .. "' not found.  Current users:")
-            local playerList = getOnlinePlayers()
-            for i = 0, playerList:size()-1 do
-                DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "'")
-            end
-            return
-        end
-    else
-        player = getPlayer()
+        self:SupplyAnotherPlayer(playerName, category)
+        return
     end
+    RicksMLC_ChatSupply.SupplyItem(getPlayer(), category)
+end
+
+function RicksMLC_ChatSupply.SupplyItem(player, category)
     if category then
         local itemType = RicksMLC_ChatSupplyConfig.Instance():GetRandomSupply(category)
         if itemType then
@@ -97,3 +91,20 @@ function RicksMLC_ChatSupply:Supply(contentList)
     end
 end
 
+function RicksMLC_ChatSupply:SupplyAnotherPlayer(otherPlayerName, category)
+    local args = { playerName = otherPlayerName, category = category }
+    sendClientCommand(getPlayer(), 'RicksMLC_ChatSupply', 'SupplyAnotherPlayer', args)
+end
+
+function RicksMLC_ChatSupply.OnServerCommand(moduleName, command, args)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply.OnServerCommand() '" .. tostring(moduleName) .. "' '" .. tostring(command) .. "'")
+    if moduleName and moduleName == "RicksMLC_ChatSupply" and command and command == "SupplyPlayer" then
+        if args.playerName and args.playerName == getPlayer():getUsername() then
+            RicksMLC_ChatSupply.SupplyItem(getPlayer(), args.category)
+        else
+            DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply.OnServerCommand() Unknown player '" .. args.playerName .. "'")
+        end
+    end
+end
+
+Events.OnServerCommand.Add(RicksMLC_ChatSupply.OnServerCommand)
