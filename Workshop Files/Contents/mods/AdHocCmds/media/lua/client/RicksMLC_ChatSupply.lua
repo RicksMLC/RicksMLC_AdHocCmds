@@ -65,34 +65,52 @@ end
 function RicksMLC_ChatSupply:Supply(contentList)
     local category = self.supplyFile:Get("category")
     local playerName = self.supplyFile:Get("player")
-    if playerName then
-        self:SupplyAnotherPlayer(playerName, category)
-        return
-    end
-    RicksMLC_ChatSupply.SupplyItem(getPlayer(), category)
-end
-
-function RicksMLC_ChatSupply.SupplyItem(player, category)
-    if category then
-        local itemType = RicksMLC_ChatSupplyConfig.Instance():GetRandomSupply(category)
-        if itemType then
-            local item = InventoryItemFactory.CreateItem(itemType)
-            if item then
-                player:getInventory():AddItem(item)
-                RicksMLC_Utils.Think(player, "Oh look.  I had a " .. item:getDisplayName() .. " in my shoe the whole time", 1)
-            else
-                RicksMLC_Utils.Think(player, "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
-            end
-        else
-            RicksMLC_Utils.Think(player, "No items for category '" .. category .. "' (maybe a typo or missing mod item)", 3)
+    local itemType = RicksMLC_ChatSupply.GetRandomItemType(category)
+    local item = nil
+    if itemType then
+        item = InventoryItemFactory.CreateItem(itemType)
+        if not item then
+            RicksMLC_Utils.Think(getPlayer(), "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
+            return
         end
     else
-        RicksMLC_Utils.Think(player, "I don't understand what should be in my shoe", 3)
+        RicksMLC_Utils.Think(getPlayer(), "No items for category '" .. category .. "' (maybe a typo or missing mod item)", 3)
+        return
+    end
+
+    if playerName then
+        self:SupplyAnotherPlayer(playerName, itemType)
+        return
+    end
+
+    RicksMLC_ChatSupply.SupplyActualItem(getPlayer(), item)
+end
+
+function RicksMLC_ChatSupply.GetRandomItemType(category)
+    if category then
+        local itemType = RicksMLC_ChatSupplyConfig.Instance():GetRandomSupply(category)
+        return itemType
+    end
+    RicksMLC_Utils.Think(getPlayer(), "I don't understand this category '" .. tostring(category) .. "' which should be in my shoe", 3)
+    return nil
+end
+
+function RicksMLC_ChatSupply.SupplyItem(player, itemType)
+    local item = InventoryItemFactory.CreateItem(itemType)
+    if item then
+        RicksMLC_ChatSupply.SupplyActualItem(player, item)
+    else
+        RicksMLC_Utils.Think(getPlayer(), "Chat Supply Fail: '" .. itemType .. "' is not here (maybe typo or missing mod item)", 3)
     end
 end
 
-function RicksMLC_ChatSupply:SupplyAnotherPlayer(otherPlayerName, category)
-    local args = { playerName = otherPlayerName, category = category }
+function RicksMLC_ChatSupply.SupplyActualItem(player, item)
+    player:getInventory():AddItem(item)
+    RicksMLC_Utils.Think(getPlayer(), "Oh look.  I had a " .. item:getDisplayName() .. " in my shoe the whole time", 1)
+end
+
+function RicksMLC_ChatSupply:SupplyAnotherPlayer(otherPlayerName, itemType)
+    local args = { playerName = otherPlayerName, itemType = itemType }
     sendClientCommand(getPlayer(), 'RicksMLC_ChatSupply', 'SupplyAnotherPlayer', args)
 end
 
@@ -100,7 +118,7 @@ function RicksMLC_ChatSupply.OnServerCommand(moduleName, command, args)
     --DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply.OnServerCommand() '" .. tostring(moduleName) .. "' '" .. tostring(command) .. "'")
     if moduleName and moduleName == "RicksMLC_ChatSupply" and command and command == "SupplyPlayer" then
         if args.playerName and args.playerName == getPlayer():getUsername() then
-            RicksMLC_ChatSupply.SupplyItem(getPlayer(), args.category)
+            RicksMLC_ChatSupply.SupplyItem(getPlayer(), args.itemType)
         else
             DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply.OnServerCommand() Unknown player '" .. args.playerName .. "'")
         end

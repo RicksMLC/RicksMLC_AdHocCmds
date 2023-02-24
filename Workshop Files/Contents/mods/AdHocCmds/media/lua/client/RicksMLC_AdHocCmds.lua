@@ -343,13 +343,13 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 		elseif key == Keyboard.KEY_F10 then
 			-- Forces load of all chatInput.txt file
 			--local startTime = getTimeInMillis()
-			if isServer() then
-				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed server")
-			elseif isClient() then
-				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed client")
-			else
-				DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed stand-alone")
-			end
+			-- if isServer() then
+			-- 	DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed server")
+			-- elseif isClient() then
+			-- 	DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed client")
+			-- else
+			-- 	DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed stand-alone")
+			-- end
 			RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 			--local endTime = getTimeInMillis()
     		--DebugLog.log(DebugType.Mod, " RicksMLC_AdHocCmds.OnKeyPressed Time: " .. tostring(endTime - startTime) .. "ms")

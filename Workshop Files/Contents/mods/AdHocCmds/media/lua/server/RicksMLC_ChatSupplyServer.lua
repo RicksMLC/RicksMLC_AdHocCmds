@@ -26,6 +26,10 @@ RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer = function(hostPlayer,
         end
         if player then
             sendServerCommand(player, "RicksMLC_ChatSupply", "SupplyPlayer", args)
+        else
+            args.playerName = hostPlayer:getUsername()
+            DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply. player not found, Send back to host '" .. args.playerName .. "'")
+            sendServerCommand(hostPlayer, "RicksMLC_ChatSupply", "SupplyPlayer", args)
         end
     else
         DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer() Error playerName " .. tostring(args.playerName) .. " not set")
