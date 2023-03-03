@@ -445,6 +445,19 @@ function RicksMLC_Vending.AddCashInButtonIfNeeded(invPage)
     RicksMLC_Vending.UpdateCashInTooltip(invPage)
 end
 
+local function isVendingMachine(invPage)
+    local itemContainer = invPage.inventory -- This is where the names get confusing, the invPage.inventory is really an ItemContainer
+    local containerType = itemContainer:getType()
+    if containerType then
+        return containerType:find("vending") ~= nil
+        -- Note: This code can be used to refine the vending machine between pop and snack.
+        -- local objType = container:getType():gsub("vending", "") then
+        -- if not (objType == "pop" or objType == "snack") then
+        -- end
+    end
+    return false
+end
+
 function RicksMLC_Vending.OnRefreshInventoryWindowContainers(invPage, state)
 	-- ISInventoryPage invPage, string State
 	if state == "end" then
@@ -452,7 +465,7 @@ function RicksMLC_Vending.OnRefreshInventoryWindowContainers(invPage, state)
         -- invPage has an "inventory" which is really an ItemContainer
         -- invPage.inventory.type == "vendingpop", but what about other vending machines? Maybe use title anyway
         -- fridges also have the type "vendingpop", so I have to use the title.
-        if not invPage.onCharacter and invPage.title == "Vending Machine" then
+        if not invPage.onCharacter and isVendingMachine(invPage) then
             -- add "cash-in" button for vending machines
             RicksMLC_Vending.AddCashInButtonIfNeeded(invPage)
             invPage.cashIn:setVisible(true)

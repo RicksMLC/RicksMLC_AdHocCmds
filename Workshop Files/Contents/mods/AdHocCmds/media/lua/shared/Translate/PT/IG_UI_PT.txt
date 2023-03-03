@@ -1,11 +1,5 @@
--- Rick's MLC Concussion
+-- Rick's MLC Vending machine
 
-Sandbox_PT = {
-    Sandbox_RicksMLC_Concussion = "Rick's MLC Concussão",
-
-    Sandbox_RicksMLC_Concussion_ConcussionEffectTime = "Tempo de efeito (segundos)",
-    Sandbox_RicksMLC_Concussion_ConcussionEffectTime_tooltip = "Quanto tempo o efeito dura em segundos",
-
-    Sandbox_RicksMLC_Concussion_ThoughtsOn = "Ver Pensamentos",
-    Sandbox_RicksMLC_Concussion_ThoughtsOn_tooltip = "Ligue/desligue pensamentos quando concussado"
-}
+IGUI_PT {
+	IGUI_RicksMLC_Vending_CashIn = "Resgatar",
+},
