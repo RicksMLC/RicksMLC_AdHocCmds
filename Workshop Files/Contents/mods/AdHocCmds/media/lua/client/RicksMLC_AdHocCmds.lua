@@ -55,66 +55,6 @@ function RicksMLC_AdHocCmds:Think(player, thought, colourNum)
 	player:Say(thought, r[colourNum], g[colourNum], b[colourNum], fonts[2], 1, "radio")
 end
 
-
-function RicksMLC_AdHocCmds:StartKateBobIntroStorm(x, y)
-	local w = getClimateManager():getWeatherPeriod();
-	if w:isRunning() then
-		getClimateManager():stopWeatherAndThunder();
-	end
-	local duration = 20
-	local strength = 0.75
-	local initialProgress = 6
-	local angle = 180
-	local initialPuddles = 0.9
-	getClimateManager():triggerKateBobIntroStorm(x, y, duration, strength, initialProgress, angle, initialPuddles);
-	getClimateManager():getThunderStorm():triggerThunderEvent(x, y, true, true, true)
-	-- FIXME: Move these to the scheduled weather script
-	--getClimateManager():transmitTriggerTropical(duration)
-	--getClimateManager():triggerWinterIsComingStorm()
-
-	local colorWhite = {r = 1.0, g = 1.0, b = 1.0}
-	local colorDarkBlue = {r = 0.3, g = 0.5, b = 0.7}
-	local lines = { 
-		{ RicksMLC_Radio.name, colorWhite },
-		{ RicksMLC_Radio.Intro, colorWhite },
-		{ "An unknown force is creating havoc in our atmosphere", colorDarkBlue } 
-	}
-	RicksMLC_Radio.BroadcastImmediate(lines)
-end
-
-function RicksMLC_AdHocCmds:StopStorm()
-	self.isStorming = false
-	local w = getClimateManager():getWeatherPeriod();
-	if w:isRunning() then
-		getClimateManager():stopWeatherAndThunder();
-		w:stopWeatherPeriod()
-	end
-
-	local colorWhite = {r = 1.0, g = 1.0, b = 1.0}
-	local colorDarkGreen = {r = 0.3, g = 0.7, b = 0.5}
-	local lines = { 
-		{ RicksMLC_Radio.name, colorWhite },
-		{ RicksMLC_Radio.Intro, colorWhite },
-		{ "Folks, the storm has just ... vanished", colorDarkGreen },
-		{ "Just another day of reporting on " .. RicksMLC_Radio.name, colorDarkGreen }
-	}
-	RicksMLC_Radio.BroadcastImmediate(lines)
-end
-
-
-function RicksMLC_AdHocCmds:StartStorm()
-	self:StartKateBobIntroStorm(getPlayer():getX(), getPlayer():getY())
-	self.isStorming = true
-end
-
-function RicksMLC_AdHocCmds:ToggleStorm()
-	if self.isStorming then
-		self:StopStorm()
-	else
-		self:StartStorm()
-	end
-end
-
 function RicksMLC_AdHocCmds:DumpChatIOFiles()
 	for k, v in pairs(self.ChatIO_CtrlFile.contentList) do
 		DebugLog.log(DebugType.Mod, "  " .. k .. " " .. v )
@@ -222,6 +162,69 @@ function RicksMLC_AdHocCmds:Init()
 	self:LoadChatIOFiles(false, RicksMLC_CtrlBootFilePath)
 end
 
+
+------------------------
+-- Weather controls - should move to its own module
+
+function RicksMLC_AdHocCmds:StartKateBobIntroStorm(x, y)
+	local w = getClimateManager():getWeatherPeriod();
+	if w:isRunning() then
+		getClimateManager():stopWeatherAndThunder();
+	end
+	local duration = 20
+	local strength = 0.75
+	local initialProgress = 6
+	local angle = 180
+	local initialPuddles = 0.9
+	getClimateManager():triggerKateBobIntroStorm(x, y, duration, strength, initialProgress, angle, initialPuddles);
+	getClimateManager():getThunderStorm():triggerThunderEvent(x, y, true, true, true)
+	-- FIXME: Move these to the scheduled weather script
+	--getClimateManager():transmitTriggerTropical(duration)
+	--getClimateManager():triggerWinterIsComingStorm()
+
+	local colorWhite = {r = 1.0, g = 1.0, b = 1.0}
+	local colorDarkBlue = {r = 0.3, g = 0.5, b = 0.7}
+	local lines = { 
+		{ RicksMLC_Radio.name, colorWhite },
+		{ RicksMLC_Radio.Intro, colorWhite },
+		{ "An unknown force is creating havoc in our atmosphere", colorDarkBlue } 
+	}
+	RicksMLC_Radio.BroadcastImmediate(lines)
+end
+
+function RicksMLC_AdHocCmds:StopStorm()
+	self.isStorming = false
+	local w = getClimateManager():getWeatherPeriod();
+	if w:isRunning() then
+		getClimateManager():stopWeatherAndThunder();
+		w:stopWeatherPeriod()
+	end
+
+	local colorWhite = {r = 1.0, g = 1.0, b = 1.0}
+	local colorDarkGreen = {r = 0.3, g = 0.7, b = 0.5}
+	local lines = { 
+		{ RicksMLC_Radio.name, colorWhite },
+		{ RicksMLC_Radio.Intro, colorWhite },
+		{ "Folks, the storm has just ... vanished", colorDarkGreen },
+		{ "Just another day of reporting on " .. RicksMLC_Radio.name, colorDarkGreen }
+	}
+	RicksMLC_Radio.BroadcastImmediate(lines)
+end
+
+
+function RicksMLC_AdHocCmds:StartStorm()
+	self:StartKateBobIntroStorm(getPlayer():getX(), getPlayer():getY())
+	self.isStorming = true
+end
+
+function RicksMLC_AdHocCmds:ToggleStorm()
+	if self.isStorming then
+		self:StopStorm()
+	else
+		self:StartStorm()
+	end
+end
+
 function RicksMLC_AdHocCmds:MadWeather()
 	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:MadWeather()")
 	if not self.weather or self.weather.weatherType ~= "madness" then return end
@@ -237,6 +240,39 @@ function RicksMLC_AdHocCmds:MadWeather()
 		end
 	end
 end
+
+function RicksMLC_AdHocCmds:WeatherTriggers()
+	-- FIXME: This is copied from the debugger UI: adjust as appropriate:
+	if _button.customData == "StopWeather" then
+		if isClient() then
+			getClimateManager():transmitStopWeather();
+		else
+			getClimateManager():stopWeatherAndThunder()
+		end
+	elseif _button.customData == "TriggerStorm" then
+		local dur = self.sliderDurationSlider:getCurrentValue();
+		if isClient() then
+			getClimateManager():transmitTriggerStorm(dur);
+		else
+			getClimateManager():triggerCustomWeatherStage(WeatherPeriod.STAGE_STORM,dur);
+		end
+	elseif _button.customData == "TriggerTropical" then
+		local dur = self.sliderDurationSlider:getCurrentValue();
+		if isClient() then
+			getClimateManager():transmitTriggerTropical(dur);
+		else
+			getClimateManager():triggerCustomWeatherStage(WeatherPeriod.STAGE_TROPICAL_STORM,dur);
+		end
+	elseif _button.customData == "TriggerBlizzard" then
+		local dur = self.sliderDurationSlider:getCurrentValue();
+		if isClient() then
+			getClimateManager():transmitTriggerBlizzard(dur);
+		else
+			getClimateManager():triggerCustomWeatherStage(WeatherPeriod.STAGE_BLIZZARD,dur);
+		end
+	end
+end
+
 
 ---------------------------------------------------------------------------------------
 RicksMLC_ChatScriptFile = ISBaseObject:derive("RicksMLC_ChatScriptFile");
@@ -321,10 +357,21 @@ function RicksMLC_AdHocCmds.EveryHours()
 	RicksMLC_AdHocCmdsInstance:HandleEveryHours()
 end
 
+local skipFirst = true
+local userSentToServer = false
 function RicksMLC_AdHocCmds.EveryTenMinutes()
 	if not RicksMLC_AdHocCmdsInstance then return end
 
 	RicksMLC_AdHocCmdsInstance:HandleEveryTenMinutes()
+
+	-- Inform the server that this client is here... so the server can update its usename list
+	if isClient() then
+		if skipFirst then skipFirst = false return end
+	 	if not userSentToServer then
+			RicksMLC_AdHocCmds.OnUserUpdate()
+			userSentToServer = true
+		end
+	end
 end
 
 function RicksMLC_AdHocCmds.EveryOneMinute()
@@ -336,6 +383,8 @@ end
 function RicksMLC_AdHocCmds.OnKeyPressed(key)
 
 	if not RicksMLC_AdHocCmdsInstance then return end
+
+	if isClient() and not isCoopHost() then return end -- Prevent non hosts from sending updates to the server
 
 	--if isAltKeyDown() then
 		if key == Keyboard.KEY_F9 then
@@ -381,3 +430,14 @@ function RicksMLC_AdHocCmds.OnGameStart()
 end
 
 Events.OnGameStart.Add(RicksMLC_AdHocCmds.OnGameStart)
+
+----------------------------------------------------------------
+
+function RicksMLC_AdHocCmds.OnUserUpdate()
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnUserUpdate()")
+	local args = { isCoopHost = isCoopHost() }
+    sendClientCommand('RicksMLC_ServerCmds', 'PlayerConnectionUpdate', args)
+end
+
+Events.OnConnected.Add(RicksMLC_AdHocCmds.OnUserUpdate)
+Events.OnDisconnect.Add(RicksMLC_AdHocCmds.OnUserUpdate)

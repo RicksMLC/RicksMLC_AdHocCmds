@@ -239,7 +239,10 @@ function ISCashInDogTagAction:perform()
                  vendingMachineConfigInst.dogTagCashInRadius, 
                  vendingMachineConfigInst.dogTagCashInVolume)
     end
-    self.invPage.inventoryPane.inventory:Remove(self.item)
+    if isClient() then
+        self.item:getContainer():removeItemOnServer(self.item)
+    end
+    self.item:getContainer():DoRemoveItem(self.item)
 
     -- needed to remove from queue / start next.
 	ISBaseTimedAction.perform(self)
@@ -297,7 +300,10 @@ function ISCashInVendAction:perform()
                  vendingMachineConfigInst.dispenseVolume)
     end
     self.invPage.inventoryPane.inventory:AddItem(self.prize)
-    -- Check if this is a config that needs popping
+    if isClient() then
+        -- Also add the item on the server otherwise it will disapear from the player inventory after transfer from vending machine directly to the player inventory
+        self.invPage.inventoryPane.inventory:addItemOnServer(self.prize)
+    end
     vendingMachineConfigInst:PopConfigIfNeeded()
 
     -- needed to remove from queue / start next.

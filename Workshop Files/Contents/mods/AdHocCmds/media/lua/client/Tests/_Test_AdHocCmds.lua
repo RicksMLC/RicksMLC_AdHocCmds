@@ -151,7 +151,7 @@ end
 function AdHocCmds_Test.IsTestSave()
     local saveInfo = getSaveInfo(getWorld():getWorld())
     DebugLog.log(DebugType.Mod, "AdHocCmds_Test.OnLoad() '" .. saveInfo.saveName .. "'")
-	return saveInfo.saveName and saveInfo.saveName == "RicksMLC_Concussion_Test"
+	return saveInfo.saveName and saveInfo.saveName:find("RicksMLC_Test") ~= nil
 end
 
 function AdHocCmds_Test.Execute()

@@ -3,6 +3,13 @@
 -- More than one zombie spawn file can be used in the chatInput.txt file.  To make a valid spawn file, the 
 -- "type=spawn" line must be included.
 --
+-- The zombies can be targeted to any player on a server by setting the "player=" to the username of the player.
+-- For example, to target me as a player the attribute would be "player=RicksMLC".  In single player play this 
+-- attribute is ignored.
+--
+-- If the username cannot be found the zombies are spawned relative the host player.
+-- Default is "player=" with no value set, so the host is targetted.
+--
 -- Mandatory attributes are:
 --      "zedname=<Name for Dogtag>" Can be alpha-numeric and include some punctuation but must 
 --                  not include "," "(" ")" ":"
@@ -33,11 +40,15 @@
 -- two random zombies.
 
 type=spawn
+player=
 
 zedname=Harold P. O'Qwerty_01-Jr
 radius=
 offset=10
 facing=yes
+
+spawnPointPreference=SameBuilding
+minArea=2
 
 zCount1=1
 gender1=m
@@ -49,7 +60,7 @@ zCount3=2
 gender3=
 outfit3=
 
-line1=Warning: There are reports of three AirCrew named "Foo Bar" who are considered dangerous.
+line1=Warning: There are reports of more erratic individuals, who are to be considered dangerous.
 line2=These individuals are identifiable by their dog tags.
 
 

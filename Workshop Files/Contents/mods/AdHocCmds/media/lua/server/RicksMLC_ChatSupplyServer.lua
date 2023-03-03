@@ -50,5 +50,4 @@ RicksMLC_ChatSupplyServer.OnClientCommand = function(moduleName, command, player
     end
 end
 
-
 Events.OnClientCommand.Add(RicksMLC_ChatSupplyServer.OnClientCommand)

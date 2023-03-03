@@ -25,6 +25,10 @@ function RicksMLC_Spawn:new(spawnFile)
     o.centre = nil
     o.offset = nil
     o.radius = nil
+    o.facing = true
+    o.spawnPointPreference = nil
+    o.minArea = 4
+
     o.spawnX = nil
     o.spawnY = nil
     o.spawnZ = nil
@@ -38,63 +42,28 @@ function RicksMLC_Spawn:new(spawnFile)
 	return o
 end
 
-function RicksMLC_Spawn:EndTimerCallback(retryNum)
-    -- Callback function at the end of the timer
-    -- returns true if the timer can end
-
-    self.postZombieList = self.playerCell:getZombieList()
-    --DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:Spawn() Server pre: " .. tostring(self.preZombieList:size()) .. " post: " .. tostring(self.postZombieList:size()))
-    -- These must be the new zombie, but do we need a timer and wait for an update?
-    local zombieList = ArrayList.new()
-    if self.preZombieList:size() < self.postZombieList:size() then
-        for i = self.preZombieList:size(), self.postZombieList:size()-1 do
-            zombieList:add(self.postZombieList:get(i))
-        end
-    end
-    if zombieList:size() == 0 then
-        local timeout = getTimeInMillis() - self.startTime
-        if timeout > 10000 then
-            -- Abort if over timeout (10 seconds)
-            DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:EndTimerCallback() Abort.  Tries:" .. tostring(retryNum) .. " Time: " .. tostring(timeout) .."ms")
-            RicksMLC_Utils.Think(getPlayer(), "Zombie Spawn Timeout for " .. tostring(self.spawner) .. "'s zombies - sorry. Timeout " .. tostring(timeout) .."ms", 3)
-            return true
-        end
-        return false
-    end
-
-    self:DecorateZombies(zombieList)
-
-    --DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:EndTimerCallback() Complete.  Tries:" .. tostring(retryNum))
-
-    return true
-end
-
-function RicksMLC_Spawn:SpawnServerZombies(x, y, z, zCount, outfit, crawler, isFallOnFront, isFakeDead, knockedDown, health)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:SpawnServerZombies()")
-    if not self.playerCell then
-        self.playerCell = getPlayer():getCell()
-        self.preZombieList = self.playerCell:getZombieList():clone()
-        --DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:SpawnServerZombies() preZombieList:" .. tostring(self.preZombieList:size()))
-    end
-
-    SendCommandToServer(
-        string.format("/createhorde2 -x %d -y %d -z %d -count %d -radius %d -crawler %s -isFallOnFront %s -isFakeDead %s -knockedDown %s -health %s -outfit %s ",
-        x, y, z, zCount, self.radius, tostring(crawler), tostring(isFallOnFront), tostring(isFakeDead), tostring(knockedDown), tostring(health), outfit or ""))
-
-end
-
 function RicksMLC_Spawn:SpawnZombies(paramList)
-    -- TODO: [ ] Allow the outfit to dictate the gender
     self.startTime = getTimeInMillis()
+
+    self.spawner = paramList["zedname"]
+    self.radius = tonumber(paramList["radius"]) or 10
+    self.offset = tonumber(paramList["offset"]) or 12
+    self.facing = paramList["facing"] 
+    self.spawnPointPreference = paramList["spawnPointPreference"]
+    self.minArea = tonumber(paramList["minArea"])
 
 	local i = 1
 	local zCount = tonumber(paramList["zCount" .. tostring(i)])
-	local fullZombieList = nil
-
-    local x = self.spawnX
-    local y = self.spawnY
-    local z = self.spawnZ
-    local isServerSpawn = false
+	local spawnResult = { fullZombieArrayList = nil }
+    local spawnArgs = { 
+        spawner = self.spawner,
+        playerUserName = paramList["player"],
+        radius = self.radius,
+        offset = self.offset,
+        facing = self.facing,
+        spawnPointPreference = self.spawnPointPreference,
+        minArea = self.minArea,
+        outfits = {} }
 
 	while zCount do
 		local outfit = paramList["outfit" .. tostring(i)]
@@ -122,60 +91,27 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
 		local isFakeDead = false
 		local knockedDown = true
 		local health = ZombRand(1, 2.9)
-        if isClient() then
-            self:SpawnServerZombies(x, y, z, zCount, outfit, crawler, isFallOnFront, isFakeDead, knockedDown, health)
-            isServerSpawn = true
-        else
-		    local zombieList = addZombiesInOutfit(x, y, z, zCount, outfit, femaleChance, crawler, isFallOnFront, isFakeDead, knockedDown, health);
-		    if fullZombieList == nil then
-    			fullZombieList = zombieList
-	    	else
-		    	fullZombieList:addAll(zombieList)
-		    end
-        end
+        spawnArgs.outfits[#spawnArgs.outfits+1] = {zCount = zCount, outfit = outfit, femaleChance = femaleChance, crawler = crawler, isFallOnFront = isFallOnFront, isFakeDead = isFakeDead, knockedDown = knockedDown, health = health}
 		i = i + 1
 		zCount = tonumber(paramList["zCount" .. tostring(i)])
 	end
 
-    if isServerSpawn then
-        -- Server spawns need time to generate the zombies, so set a timer to check for new zombies in the cell
+    if isClient() then
+        -- Server spawns need time to generate the zombies
         -- TODO: This is a first approximation for new zombies.  A future update should use client/server protocol
         -- or better yet, spawn using the server instead of the client driving the dogtag on death assignment.
-        RicksMLC_SpawnTimer:Instance():Add(self)
+        --RicksMLC_SpawnTimer:Instance():Add(self)
+        sendClientCommand(getPlayer(), 'RicksMLC_Zombies', 'SpawnOutfit', spawnArgs)
+    
+    elseif not isServer() then
+        spawnResult = RicksMLC_SpawnCommon.SpawnOutfit(getPlayer(), spawnArgs)
+        if RicksMLC_SpawnTestInstance then
+            RicksMLC_SpawnTestInstance:ShowSpawnResult(spawnResult)
+        end
+
     end
 
-    return fullZombieList
-end
-
-function RicksMLC_Spawn:MakeSpawnLocation(paramList) 
-    self.radius = paramList["radius"] or 10
-	local offset = paramList["offset"] or 12
-    local facing = paramList["facing"] 
-
-    if facing then 
-        local lookDir = getPlayer():getForwardDirection()
-        self.spawnX = getPlayer():getX() + (lookDir:getX() * offset)
-        self.spawnY = getPlayer():getY() + (lookDir:getY() * offset)
-        self.spawnZ = getPlayer():getZ()
-        return
-    else
-        -- Random location for the spawn point and add offset
-        local xCentre = ZombRand(-self.radius, self.radius + 1)
-        if xCentre < 0 then
-            xCentre = xCentre - offset
-        else
-            xCentre = xCentre + offset
-        end
-        local yCentre = ZombRand(-self.radius, self.radius + 1)
-        if yCentre < 0 then
-            yCentre = yCentre - offset
-        else
-            yCentre = yCentre + offset
-        end
-        self.spawnX = getPlayer():getX() + xCentre
-        self.spawnY = getPlayer():getY() + yCentre
-        self.spawnZ = getPlayer():getZ()
-    end
+    return spawnResult.fullZombieArrayList
 end
 
 function RicksMLC_Spawn:SetZombieDogtag(zombie, zId, numZombies)
@@ -187,8 +123,6 @@ function RicksMLC_Spawn:SetZombieDogtag(zombie, zId, numZombies)
     dogtag:setName(dogTagName)
     dogtag:setCustomName(true)
     zombie:addItemToSpawnAtDeath(dogtag)
-    local zModData = zombie:getModData()
-    zModData["RicksMLC_Spawn"] = {self.spawner, numZombies, zId, zombie.ZombieID}
 end
 
 function RicksMLC_Spawn:DecorateZombies(fullZombieList)
@@ -207,15 +141,11 @@ end
 function RicksMLC_Spawn:Spawn(paramList)
 	--DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:Spawn()")
 
-	self.spawner = paramList["zedname"]
-
-    self:MakeSpawnLocation(paramList)
-
 	local fullZombieList = self:SpawnZombies(paramList)
     if not fullZombieList then return end -- The server may need time to generate them. Wait for the RicksMLC_SpawnTimer
-
-    self:DecorateZombies(fullZombieList)
-
+    if not isClient() and not isServer() then
+        self:DecorateZombies(fullZombieList)
+    end
 end
 
 function RicksMLC_Spawn:WriteOutfits()
@@ -234,6 +164,156 @@ function RicksMLC_Spawn:WriteOutfits()
 	end
 
 	self.spawnFile:Save("=", false)
+end
+
+-----------------------------------------------
+
+require "Map/CGlobalObjectSystem"
+
+RicksMLC_SpawnHandlerC = CGlobalObjectSystem:derive("RicksMLC_SpawnHandlerC")
+
+function RicksMLC_SpawnHandlerC:new()
+	local o = CGlobalObjectSystem.new(self, "RicksMLC_SpawnHandler")
+	if not o.zombieSpawnList then error "zombieSpawnList wasn't sent from the server?" end
+    if not o.numTrackedZombies then error "numTrackedZombies wasn't sent from the server?" end
+
+	return o
+end
+
+RicksMLC_SpawnHandlerC.OnHitZombie = function (zombie, character, bodyPartType, handWeapon)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler.OnHitZombie()")
+    RicksMLC_SpawnHandler.instance:AddDogTag(zombie)
+end
+
+function RicksMLC_SpawnHandlerC:HandleUpdatedZombieList()
+    Events.OnHitZombie.Add(RicksMLC_SpawnHandlerC.OnHitZombie)
+end
+
+function RicksMLC_SpawnHandlerC:OnServerCommand(command, args)
+    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandlerC.OnServerCommand()")
+	if command == "HandleSpawnedZombies" then
+		self.zombieSpawnList = args.zombieSpawnList
+        self.numTrackedZombies = args.numTrackedZombies
+    else
+		CGlobalObjectSystem.OnServerCommand(self, command, args)
+	end
+end
+
+if isClient() then
+    DebugLog.log(DebugType.Mod, "RicksMLC_Spawn. RegisterSystemClass")
+    CGlobalObjectSystem.RegisterSystemClass(RicksMLC_SpawnHandlerC)
+end
+
+
+-----------------------------------------------
+require "ISBaseObject"
+RicksMLC_SpawnHandler = ISBaseObject:derive("RicksMLC_SpawnHandler")
+
+RicksMLC_SpawnHandlerInstance = nil
+function RicksMLC_SpawnHandler.Instance()
+    if not RicksMLC_SpawnHandlerInstance then
+        RicksMLC_SpawnHandlerInstance = RicksMLC_SpawnHandler:new()
+    end
+    return RicksMLC_SpawnHandlerInstance
+end
+
+function RicksMLC_SpawnHandler:new()
+    local o = {}
+    setmetatable(o, self)
+    self.__index = self
+
+    o.spawnedZombies = {}
+    o.numTrackedZombies = 0
+
+    o.isOnHitZombieOn = false
+
+    return o
+end
+
+function RicksMLC_SpawnHandler:AddDogTag(zombie)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddDogTag")
+    local zombieId = zombie:getOnlineID()
+    local zombieDogTagInfo = self.spawnedZombies[zombieId]
+    if zombieDogTagInfo then
+        local dogtag = InventoryItemFactory.CreateItem("Necklace_DogTag")
+        dogtag:setName(zombieDogTagInfo)
+        dogtag:setCustomName(true)
+        zombie:addItemToSpawnAtDeath(dogtag)
+        self.spawnedZombies[zombieId] = nil
+        self.numTrackedZombies = self.numTrackedZombies - 1
+        self:UpdateOnHitZombieEvent()
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddDogTag() Dogtag added for " .. tostring(zombieId) .. " " .. zombieDogTagInfo)
+    end
+end
+
+RicksMLC_SpawnHandler.OnHitZombie = function (zombie, character, bodyPartType, handWeapon)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler.OnHitZombie()")
+    RicksMLC_SpawnHandler.Instance():AddDogTag(zombie)
+end
+
+function RicksMLC_SpawnHandler:UpdateOnHitZombieEvent()
+    if self.numTrackedZombies == 0 and self.isOnHitZombieOn then
+        Events.OnHitZombie.Remove(RicksMLC_SpawnHandler.OnHitZombie)
+        self.isOnHitZombieOn = false
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:UpdateOnHitZombieEvent() OnHitZombie ON")
+        return
+    end
+    if self.numTrackedZombies > 0 and not self.isOnHitZombieOn then
+        Events.OnHitZombie.Add(RicksMLC_SpawnHandler.OnHitZombie)
+        self.isOnHitZombieOn = true
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:UpdateOnHitZombieEvent() OnHitZombie OFF")
+    end
+end
+
+function RicksMLC_SpawnHandler:AddSpawnedZombies(spawnArgs)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddSpawnedZombies() ")
+    for k, v in pairs(spawnArgs.zombieDogTagList) do
+        self.spawnedZombies[k] = v
+        self.numTrackedZombies = self.numTrackedZombies + 1
+        --DebugLog.log(DebugType.Mod, "      " .. tostring(k) .. " " .. self.spawnedZombies[k])
+    end
+
+    if RicksMLC_SpawnTestInstance then
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddSpawnedZombies() call ShowSpawnResult()")
+        -- FIXME: Comment out when done?
+        --local argStr = ''
+        --for k,v in pairs(spawnArgs.spawnResult) do argStr = argStr..' '..k..'='..tostring(v) end
+        --DebugLog.log(DebugType.Mod, '  spawnResult: ' .. argStr)
+        RicksMLC_SpawnTestInstance:ShowSpawnResult(spawnArgs.spawnResult)
+    end
+
+    self:UpdateOnHitZombieEvent()
+end
+
+local RicksMLC_ServerCmds = {}
+local Cmds = {}
+Cmds.RicksMLC_SpawnHandler = {} -- The RicksMLC_ prefix is needed to distinguish from the vanilla server commands
+
+Cmds.RicksMLC_SpawnHandler.HandleSpawnedZombies = function(args)
+    --DebugLog.log(DebugType.Mod, "Cmds.RicksMLC_SpawnHandler.HandleSpawnedZombies()")
+    RicksMLC_SpawnHandler.Instance():AddSpawnedZombies(args)
+end
+
+RicksMLC_ServerCmds.OnServerCommand = function(moduleName, command, args)
+   	if Cmds[moduleName] and Cmds[moduleName][command] then
+   		Cmds[moduleName][command](args)
+   	end
+end
+
+---------------------------------------------------------
+
+function RicksMLC_SpawnHandler.TestSendSpawnToServer()
+    DebugLog.log(DebugType.Mod, "RicksMLC_ScratchShared.SendSpawnToServer()")
+    local offset = 10
+    local lookDir = getPlayer():getForwardDirection()
+    local spawnX = getPlayer():getX() + (lookDir:getX() * offset)
+    local spawnY = getPlayer():getY() + (lookDir:getY() * offset)
+    local spawnZ = getPlayer():getZ()
+
+    local args = { x = spawnX, y = spawnY, z = spawnZ }
+    args.outfit = ""
+    args.spawner = "Moriarity"
+    sendClientCommand(getPlayer(), 'RicksMLC_Zombies', 'SpawnOutfit', args)
 end
 
 -----------------------------------------------
@@ -263,4 +343,8 @@ end
 function RicksMLC_Spawn.Init()
     DebugLog.log(DebugType.Mod, "RicksMLC_Spawn.Init()")
     RicksMLC_Spawn.CacheOutfits()
+
+    if isClient() then
+        Events.OnServerCommand.Add(RicksMLC_ServerCmds.OnServerCommand)
+    end
 end
