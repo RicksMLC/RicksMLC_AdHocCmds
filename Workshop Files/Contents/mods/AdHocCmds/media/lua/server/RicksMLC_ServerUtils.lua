@@ -54,6 +54,7 @@ function RicksMLC_ServerUtils.WriteUserNames()
         for i = 0, playerList:size()-1 do
             line = playerList:get(i):getUsername()
 			luaFileWriter:writeln(line)
+            DebugLog.log(DebugType.Mod, "   username: '" .. line .. "'")
 		end
 	end
 	luaFileWriter:close()

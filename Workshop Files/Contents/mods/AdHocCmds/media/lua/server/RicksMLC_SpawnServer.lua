@@ -64,8 +64,16 @@ function RicksMLC_SpawnServer:AddNewSpawns(spawnResult, spawner)
         return
     end
     self.numTrackedZombies = self.numTrackedZombies + n
-    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer:AddNewSpawns(): sendServerCommand")
-    local args = { zombieDogTagList = newSpawnList,  spawnResult = spawnResult }
+
+    local args = { zombieDogTagList = newSpawnList,  spawnResult = spawnResult, spawnBuildingIds = { buildingId = nil, spawnRoomId = nil }}
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer:AddNewSpawns() spawnRoomInfo " .. tostring(spawnResult.spawnRoomInfo) .. " buildingDef: " .. tostring(spawnResult.spawnRoomInfo.buildingDef))
+    if spawnResult.spawnRoomInfo and spawnResult.spawnRoomInfo.buildingDef then
+        -- Convert the objects to Ids so the client can translate them back into objects
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer:AddNewSpawns() " ..  tostring(spawnResult.spawnRoomInfo.buildingDef:getID()) .. " " .. tostring(spawnResult.spawnRoomInfo.spawnRoomDef:getID()))
+        args.spawnBuildingIds.buildingId = spawnResult.spawnRoomInfo.buildingDef:getID()
+        args.spawnBuildingIds.spawnRoomId = spawnResult.spawnRoomInfo.spawnRoomDef:getID()
+    end
+    --RicksMLC_SpawnCommon.DumpArgs(args, 0, "Server:HandleSpawnedZombies")
     sendServerCommand('RicksMLC_SpawnHandler', 'HandleSpawnedZombies', args)
 end
 
@@ -101,6 +109,7 @@ local RicksMLC_Commands = {}
 RicksMLC_Commands.RicksMLC_Zombies = {}
 
 RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit = function(player, args)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit()")
     local spawnResult = RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     if spawnResult.fullZombieArrayList then
         --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): AddNewSpawns() called")

@@ -176,14 +176,41 @@ function RicksMLC_SpawnTest:HandlePlayerUpdate()
     self:UpdateSpawnPoint()
 end
 
-function RicksMLC_SpawnTest:ShowSpawnResult(spawnResult)
+function RicksMLC_SpawnTest:ConvertIdsToRoom(spawnBuildingIds)
+    local spawnBuildingDef = getPlayer():getCurrentBuildingDef()
+    if spawnBuildingDef then
+        self.otherRoomDef = getPlayer():getCell():getRoom(spawnBuildingIds.spawnRoomId)
+        -- local roomDefArrayList = spawnBuildingDef:getRooms()
+        -- for j = 0, roomDefArrayList:size()-1 do
+        --     if roomDefArrayList:get(j):getID() == spawnBuildingIds.spawnRoomId then
+        --         self.otherRoomDef = roomDefArrayList:get(j)
+        --         self.freeSquare = self.otherRoomDef:getFreeSquare()
+        --         break
+        --     end
+        -- end
+        if self.otherRoomDef then
+            self.isoBuilding = self.otherRoomDef:getIsoRoom():getBuilding()
+            self.showingSpawnResult = true
+            return true
+        end
+    end
+    return false
+end
+
+function RicksMLC_SpawnTest:ShowSpawnResult(spawnResult, spawnBuildingIds)
     -- args { spanwResult.spawnLoc, spawnResult.spawnRoomInfo }
     if spawnResult.spawnLoc then
         self:DrawSpawnPoint(spawnResult.spawnLoc.x, spawnResult.spawnLoc.y, spawnResult.spawnLoc.z, 1, 1)
         self.showingSpawnResult = true
     elseif spawnResult.spawnRoomInfo then
-        if not spawnResult.spawnRoomInfo.spawnRoomDef then
-            DebugLog.log(DebugType.Mod, "RicksMLC_SpawnTest:ShowSpawnResult() spawnRoomInfo has no spawnRoomDef")
+        if not spawnResult.spawnRoomInfo.spawnRoomDef and spawnBuildingIds and spawnBuildingIds.spawnRoomId then
+            if not self:ConvertIdsToRoom(spawnBuildingIds) then
+                self.showingSpawnResult = false
+                self:ClearSpawnPoint()
+                return
+            end
+        elseif not spawnResult.spawnRoomInfo.spawnRoomDef then
+            DebugLog.log(DebugType.Mod, "RicksMLC_SpawnTest:ShowSpawnResult() spawnRoomInfo has no spawnRoomDef or spawnRoomId")
             self.showingSpawnResult = false
             self:ClearSpawnPoint()    
             return

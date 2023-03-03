@@ -180,14 +180,15 @@ function RicksMLC_SpawnHandlerC:new()
 	return o
 end
 
-RicksMLC_SpawnHandlerC.OnHitZombie = function (zombie, character, bodyPartType, handWeapon)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler.OnHitZombie()")
-    RicksMLC_SpawnHandler.instance:AddDogTag(zombie)
-end
-
-function RicksMLC_SpawnHandlerC:HandleUpdatedZombieList()
-    Events.OnHitZombie.Add(RicksMLC_SpawnHandlerC.OnHitZombie)
-end
+--FIXME: Remove:
+-- RicksMLC_SpawnHandlerC.OnHitZombie = function (zombie, character, bodyPartType, handWeapon)
+--     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler.OnHitZombie()")
+--     RicksMLC_SpawnHandler.instance:AddDogTag(zombie)
+-- end
+--
+-- function RicksMLC_SpawnHandlerC:HandleUpdatedZombieList()
+--     Events.OnHitZombie.Add(RicksMLC_SpawnHandlerC.OnHitZombie)
+-- end
 
 function RicksMLC_SpawnHandlerC:OnServerCommand(command, args)
     DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandlerC.OnServerCommand()")
@@ -274,12 +275,11 @@ function RicksMLC_SpawnHandler:AddSpawnedZombies(spawnArgs)
     end
 
     if RicksMLC_SpawnTestInstance then
-        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddSpawnedZombies() call ShowSpawnResult()")
-        -- FIXME: Comment out when done?
-        --local argStr = ''
-        --for k,v in pairs(spawnArgs.spawnResult) do argStr = argStr..' '..k..'='..tostring(v) end
-        --DebugLog.log(DebugType.Mod, '  spawnResult: ' .. argStr)
-        RicksMLC_SpawnTestInstance:ShowSpawnResult(spawnArgs.spawnResult)
+        -- Show the spawn result diagnostic for the target player
+        if getPlayer():getUsername() == spawnArgs.spawnResult.targetPlayerName then
+            --RicksMLC_SpawnCommon.DumpArgs(spawnArgs, 0, "Client:AddSpawnedZombies()")
+            RicksMLC_SpawnTestInstance:ShowSpawnResult(spawnArgs.spawnResult, spawnArgs.spawnBuildingIds)
+        end
     end
 
     self:UpdateOnHitZombieEvent()

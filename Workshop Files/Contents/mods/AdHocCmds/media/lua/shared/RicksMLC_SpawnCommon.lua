@@ -88,7 +88,7 @@ function RicksMLC_SpawnCommon.ChooseSpawnRoom(player, minArea)
     local isoBuilding = player:getCurrentBuilding()
     local currentRoomDef = player:getCurrentRoomDef()
     local getRoomsNumber = isoBuilding:getRoomsNumber()
-    local spawnRoomInfo = { buldingDef = isoBuilding:getDef(), spawnRoomDef = nil, freeSquare = nil}
+    local spawnRoomInfo = { buildingDef = isoBuilding:getDef(), spawnRoomDef = nil, freeSquare = nil}
     if getRoomsNumber > 1 and not spawnRoomInfo.spawnRoomDef then
         spawnRoomInfo.spawnRoomDef = isoBuilding:getDef():getRandomRoom(minArea)
         local i = 0
@@ -114,7 +114,7 @@ function RicksMLC_SpawnCommon.SpawnInBuilding(player, args)
         spawnResult.spawnRoomInfo = spawnRoomInfo
         for k, v in ipairs(args.outfits) do
             -- DebugLog.log(DebugType.Mod, "    outfit: '" .. tostring(v.outfit) .. "' f% " .. tostring(v.femaleChance))
-            local zombieArrayList = addZombiesInBuilding(spawnRoomInfo.buldingDef, v.zCount, v.outfit, spawnRoomInfo.spawnRoomDef, v.femaleChance);
+            local zombieArrayList = addZombiesInBuilding(spawnRoomInfo.buildingDef, v.zCount, v.outfit, spawnRoomInfo.spawnRoomDef, v.femaleChance);
             if spawnResult.fullZombieArrayList == nil then
                 spawnResult.fullZombieArrayList = zombieArrayList
             else
@@ -144,22 +144,47 @@ function RicksMLC_SpawnCommon.SpawnNormal(player, args)
 end
 
 function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit()")
+    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit()")
 
-    if args.playerUserName and isClient() then
+    if args.playerUserName and isServer() then
+        DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): spawn on other player '" .. args.playerUserName .. "'")
         local otherPlayer = RicksMLC_ServerUtils.GetPlayer(args.playerUserName, true)
         if otherPlayer then
             player = otherPlayer
+            DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): Other player '" .. args.playerUserName .. "' found. Mwahahah.")
         end
     end
 
-    local spawnResult = { fullZombieArrayList = nil, spawnLoc = {}, spawnRoomInfo = {} }
+    local spawnResult = { fullZombieArrayList = nil, spawnLoc = {}, spawnRoomInfo = {}, targetPlayerName = nil }
     if not player:isOutside() and args.spawnPointPreference and args.spawnPointPreference:find("SameBuilding") ~= nil then
         spawnResult = RicksMLC_SpawnCommon.SpawnInBuilding(player, args)
     end
     if spawnResult.fullZombieArrayList == nil then
         spawnResult = RicksMLC_SpawnCommon.SpawnNormal(player, args)
     end
+    spawnResult.targetPlayerName = player:getUsername()
+
     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): Finished.")
     return spawnResult
+end
+
+function RicksMLC_SpawnCommon.DumpArgs(args, lvl, desc)
+    if not lvl then lvl = 0 end
+    if lvl == 0 then
+        DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.DumpArgs() " .. desc .. " begin")
+    end
+    local argIndent = ''
+    for i = 1, lvl do
+        argIndent = argIndent .. "   "
+    end
+    for k,v in pairs(args) do 
+        local argStr = argIndent .. ' ' .. k .. '=' .. tostring(v) 
+        DebugLog.log(DebugType.Mod, argStr)
+        if type(v) == "table" then
+            RicksMLC_SpawnCommon.DumpArgs(v, lvl + 1)
+        end
+    end
+    if lvl == 0 then
+        DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.DumpArgs() " .. desc .. " end")
+    end
 end
