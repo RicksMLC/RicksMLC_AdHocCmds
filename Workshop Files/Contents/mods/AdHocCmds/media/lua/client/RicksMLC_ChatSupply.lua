@@ -78,7 +78,7 @@ function RicksMLC_ChatSupply:Supply(contentList)
         return
     end
 
-    if playerName then
+    if isClient() and playerName then
         self:SupplyAnotherPlayer(playerName, itemType)
         return
     end
