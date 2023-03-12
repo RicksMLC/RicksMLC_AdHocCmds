@@ -11,10 +11,12 @@ RicksMLC_SpawnServer = SGlobalObjectSystem:derive("RicksMLC_SpawnServer")
 function RicksMLC_SpawnServer:new()
  	local o = SGlobalObjectSystem.new(self, "RicksMLC_SpawnHandler")
 
-	 -- Note: Read from gos_RicksMLC_SpawnHandler.bin
     o.zombieSpawnList = { }
     o.numTrackedZombies = 0
     o.dogTagDisplayName = InventoryItemFactory.CreateItem("Necklace_DogTag"):getDisplayName()
+
+    -- Note: Read from gos_RicksMLC_SpawnHandler.bin
+    o.safehouseSafeZoneRadius = o.safehouseSafeZoneRadius or 16
 
  	return o
 end
@@ -34,14 +36,18 @@ function RicksMLC_SpawnServer:initSystem()
 	SGlobalObjectSystem.initSystem(self)
 
 	-- Specify GlobalObjectSystem fields that should be saved.
-	self.system:setModDataKeys({'zombieSpawnList', 'numTrackedZombies'})
+	self.system:setModDataKeys({'zombieSpawnList', 'numTrackedZombies', 'safehouseSafeZoneRadius'})
 end
 
 function RicksMLC_SpawnServer:getInitialStateForClient()
 	-- Return a Lua table that is used to initialize the client-side system.
 	-- This is called when a client connects in multiplayer, and after
 	-- server-side systems are created in singleplayer.
-	return { zombieSpawnList = self.zombieSpawnList, numTrackedZombies = self.numTrackedZombies }
+	return { 
+        zombieSpawnList = self.zombieSpawnList,
+        numTrackedZombies = self.numTrackedZombies,
+        safehouseSafeZoneRadius = self.safehouseSafeZoneRadius
+    }
 end
 
 function RicksMLC_SpawnServer:GetZombieDogtagName(zId, numZombies, spawner)
@@ -105,6 +111,15 @@ function RicksMLC_SpawnServer:SendZombieList(player)
     sendServerCommand('RicksMLC_SpawnHandler', 'HandleSpawnedZombies', args)
 end
 
+function RicksMLC_SpawnServer:UpdateSafeZone(player, args)
+    
+    if args.safeZoneRadius and self.safehouseSafeZoneRadius ~= args.safeZoneRadius then
+        self.safehouseSafeZoneRadius = args.safeZoneRadius
+        local clientArgs = { safehouseSafeZoneRadius = args.safeZoneRadius }
+        self:sendCommand('UpdateSafehouseZone', clientArgs)
+    end
+end
+
 local RicksMLC_Commands = {}
 RicksMLC_Commands.RicksMLC_Zombies = {}
 
@@ -116,6 +131,10 @@ RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit = function(player, args)
         RicksMLC_SpawnServer.instance:AddNewSpawns(spawnResult, args.spawner)
     end
     --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): Finished.")
+end
+
+RicksMLC_Commands.RicksMLC_Zombies.UpdateSafeZoneFromClient = function(player, args)
+    RicksMLC_SpawnServer.instance:UpdateSafeZone(player, args)
 end
 
 function RicksMLC_SpawnServer.OnZombieDead(zombie)

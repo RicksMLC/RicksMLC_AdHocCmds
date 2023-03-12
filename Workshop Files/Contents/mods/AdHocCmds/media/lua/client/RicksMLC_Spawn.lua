@@ -28,6 +28,7 @@ function RicksMLC_Spawn:new(spawnFile)
     o.facing = true
     o.spawnPointPreference = nil
     o.minArea = 4
+    o.safeZoneRadius = 15
 
     o.spawnX = nil
     o.spawnY = nil
@@ -51,10 +52,15 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
     self.facing = paramList["facing"] 
     self.spawnPointPreference = paramList["spawnPointPreference"]
     self.minArea = tonumber(paramList["minArea"])
+    self.safeZoneRadius = tonumber(paramList["safeZoneRadius"])
 
 	local i = 1
 	local zCount = tonumber(paramList["zCount" .. tostring(i)])
 	local spawnResult = { fullZombieArrayList = nil }
+    local safeZoneRadius = nil
+    if RicksMLC_SpawnHandlerC.instance and RicksMLC_SpawnHandlerC.instance and RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius then
+        safeZoneRadius = RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius
+    end
     local spawnArgs = { 
         spawner = self.spawner,
         playerUserName = paramList["player"],
@@ -63,7 +69,9 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
         facing = self.facing,
         spawnPointPreference = self.spawnPointPreference,
         minArea = self.minArea,
-        outfits = {} }
+        safeZoneRadius = safeZoneRadius,
+        outfits = {}
+    }
 
 	while zCount do
 		local outfit = paramList["outfit" .. tostring(i)]
@@ -176,25 +184,17 @@ function RicksMLC_SpawnHandlerC:new()
 	local o = CGlobalObjectSystem.new(self, "RicksMLC_SpawnHandler")
 	if not o.zombieSpawnList then error "zombieSpawnList wasn't sent from the server?" end
     if not o.numTrackedZombies then error "numTrackedZombies wasn't sent from the server?" end
+    if not o.safehouseSafeZoneRadius then error "safehouseSafeZoneRadius wasn't sent from the server?" end
 
 	return o
 end
 
---FIXME: Remove:
--- RicksMLC_SpawnHandlerC.OnHitZombie = function (zombie, character, bodyPartType, handWeapon)
---     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler.OnHitZombie()")
---     RicksMLC_SpawnHandler.instance:AddDogTag(zombie)
--- end
---
--- function RicksMLC_SpawnHandlerC:HandleUpdatedZombieList()
---     Events.OnHitZombie.Add(RicksMLC_SpawnHandlerC.OnHitZombie)
--- end
-
 function RicksMLC_SpawnHandlerC:OnServerCommand(command, args)
-    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandlerC.OnServerCommand()")
 	if command == "HandleSpawnedZombies" then
 		self.zombieSpawnList = args.zombieSpawnList
         self.numTrackedZombies = args.numTrackedZombies
+    elseif command == "UpdateSafehouseZone" then
+        self.safehouseSafeZoneRadius = args.safehouseSafeZoneRadius
     else
 		CGlobalObjectSystem.OnServerCommand(self, command, args)
 	end
@@ -204,7 +204,6 @@ if isClient() then
     DebugLog.log(DebugType.Mod, "RicksMLC_Spawn. RegisterSystemClass")
     CGlobalObjectSystem.RegisterSystemClass(RicksMLC_SpawnHandlerC)
 end
-
 
 -----------------------------------------------
 require "ISBaseObject"
@@ -243,7 +242,6 @@ function RicksMLC_SpawnHandler:AddDogTag(zombie)
         self.spawnedZombies[zombieId] = nil
         self.numTrackedZombies = self.numTrackedZombies - 1
         self:UpdateOnHitZombieEvent()
-        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddDogTag() Dogtag added for " .. tostring(zombieId) .. " " .. zombieDogTagInfo)
     end
 end
 

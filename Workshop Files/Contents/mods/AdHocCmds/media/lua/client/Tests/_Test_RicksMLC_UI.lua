@@ -1,11 +1,14 @@
 require "ISUI/ISCollapsableWindow"
 
+
+
 _Test_RicksMLC_UI_Window = ISCollapsableWindow:derive("_Test_RicksMLC_UI_Window")
 _Test_RicksMLC_UI_Window.windows = {}
 
 function _Test_RicksMLC_UI_Window:createChildren()
 	ISCollapsableWindow.createChildren(self)
-	self.panel = ISToolTip:new()
+
+	self.panel = ISToolTip:new() -- ISPanel.new(self, 0, 0, self.width, self.height-30) --ISToolTip:new()
 	self.panel.followMouse = false
 	self.panel:initialise()
 	self:setObject(self.object)
@@ -63,9 +66,9 @@ function _Test_RicksMLC_UI_Window:close()
 	self:removeFromUIManager()
 end
 
-function _Test_RicksMLC_UI_Window:new(x, y, character, object, title)
-	local width = 600
-	local height = 16 + 64 + 16 + 16
+function _Test_RicksMLC_UI_Window:new(x, y, character, object, title, width, height)
+	local width = width or 600
+	local height = height or 16 + 64 + 16 + 16 + 60
 	local o = ISCollapsableWindow:new(x, y, width, height)
 	setmetatable(o, self)
 	self.__index = self

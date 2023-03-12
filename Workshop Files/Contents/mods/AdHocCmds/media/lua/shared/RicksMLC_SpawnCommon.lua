@@ -3,7 +3,27 @@
 
 RicksMLC_SpawnCommon = {}
 
-local function makeSpawnLocation(player, radius, offset, facing) 
+function RicksMLC_SpawnCommon.CalcSafeZoneSpawnPoint(spawnLoc, radius, minSafeDistance)
+    for i=0,SafeHouse.getSafehouseList():size()-1 do
+        local safe = SafeHouse.getSafehouseList():get(i);
+        local safeX = safe:getX() + safe:getW()/2
+        local safeY = safe:getY() + safe:getH()/2
+        local distance = IsoUtils.DistanceTo2D(spawnLoc.x, spawnLoc.y, safeX, safeY)
+        if distance < minSafeDistance + radius then
+            local vSafeToPlayer = Vector2.new(spawnLoc.x - safeX, spawnLoc.y - safeY)
+            local vSafeToSpawn = Vector2.new(vSafeToPlayer)
+            vSafeToSpawn:setLength(minSafeDistance + radius)
+            vSafeToSpawn:add(Vector2.new(safeX, safeY))
+            return { 
+                x = PZMath.roundToInt(vSafeToSpawn:getX()), y = PZMath.roundToInt(vSafeToSpawn:getY()), z = 0, radius = radius, 
+                safehouse = {x = PZMath.roundToInt(safeX), y = PZMath.roundToInt(safeY), z = 0, radius = minSafeDistance} 
+            }
+        end
+        return nil
+    end
+end
+
+function RicksMLC_SpawnCommon.MakeSpawnLocation(player, radius, offset, facing, safeZoneRadius) 
     local retLoc = { 
         x = player:getX(),
         y = player:getY(),
@@ -32,11 +52,13 @@ local function makeSpawnLocation(player, radius, offset, facing)
         retLoc.y = player:getY() + yCentre
         retLoc.z = player:getZ()
     end
-    if isClient() or not isServer() then
-        if RicksMLC_SpawnTestInstance then
-            RicksMLC_SpawnTestInstance:DrawSpawnPoint(retLoc.x, retLoc.y, retLoc.z, radius, offset)
+    if isServer() and safeZoneRadius then
+        local safeZoneLoc = RicksMLC_SpawnCommon.CalcSafeZoneSpawnPoint(retLoc, radius, safeZoneRadius)
+        if safeZoneLoc then
+            return safeZoneLoc
         end
     end
+
     return retLoc
 end
 
@@ -73,7 +95,6 @@ end
 
 
 local function calcRandomLocation(spawnLoc, radius, numZombies)
---    local area = radius * radius
     local playerList = getPlayersToAvoid()
     local retLoc = jitterLocation(spawnLoc, radius)
     local tryNum = 0 -- Limit the number of tries - if it runs out of trys, just use the last one.
@@ -127,7 +148,7 @@ end
 
 function RicksMLC_SpawnCommon.SpawnNormal(player, args)
     local spawnResult = { fullZombieArrayList = nil, spawnLoc = {} }
-    spawnResult.spawnLoc = makeSpawnLocation(player, args.radius, args.offset, args.facing) 
+    spawnResult.spawnLoc = RicksMLC_SpawnCommon.MakeSpawnLocation(player, args.radius, args.offset, args.facing, args.safeZoneRadius) 
     for k, v in ipairs(args.outfits) do
         -- DebugLog.log(DebugType.Mod, "    outfit: '" .. tostring(v.outfit) .. "' f% " .. tostring(v.femaleChance))
         for i = 1, v.zCount do
@@ -143,22 +164,30 @@ function RicksMLC_SpawnCommon.SpawnNormal(player, args)
     return spawnResult
 end
 
-function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
-    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit()")
 
+local function isSpawnInBuilding(player, args)
+    return not player:isOutside() 
+        and args.spawnPointPreference 
+        and args.spawnPointPreference:find("SameBuilding") ~= nil
+        and SafeHouse.getSafeHouse(player:getSquare()) == nil
+end
+
+function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit()")
     if args.playerUserName and isServer() then
-        DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): spawn on other player '" .. args.playerUserName .. "'")
+        --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): spawn on other player '" .. args.playerUserName .. "'")
         local otherPlayer = RicksMLC_ServerUtils.GetPlayer(args.playerUserName, true)
         if otherPlayer then
             player = otherPlayer
-            DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): Other player '" .. args.playerUserName .. "' found. Mwahahah.")
+            --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): Other player '" .. args.playerUserName .. "' found. Mwahahah.")
         end
     end
 
     local spawnResult = { fullZombieArrayList = nil, spawnLoc = {}, spawnRoomInfo = {}, targetPlayerName = nil }
-    if not player:isOutside() and args.spawnPointPreference and args.spawnPointPreference:find("SameBuilding") ~= nil then
+    if isSpawnInBuilding(player, args) then
         spawnResult = RicksMLC_SpawnCommon.SpawnInBuilding(player, args)
     end
+    -- Spawn normal ie: relative to the player co-ords if outside or no zombies spawned in the player building (maybe only one room)
     if spawnResult.fullZombieArrayList == nil then
         spawnResult = RicksMLC_SpawnCommon.SpawnNormal(player, args)
     end
@@ -172,6 +201,7 @@ function RicksMLC_SpawnCommon.DumpArgs(args, lvl, desc)
     if not lvl then lvl = 0 end
     if lvl == 0 then
         DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.DumpArgs() " .. desc .. " begin")
+        if not args then DebugLog.log(DebugType.Mod, " args is nil.") return end
     end
     local argIndent = ''
     for i = 1, lvl do

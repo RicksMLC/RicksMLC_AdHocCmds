@@ -17,6 +17,7 @@ description= <INDENT:20> * Toggle storms <LINE>
 description= <INDENT:20> * Chat can supply items to the player inventory <LINE>
 description= <INDENT:20> * Cash in dogtags at Vending Machines for prizes (no refunds) <LINE>
 description= <INDENT:20> * All features listed above are configurable in the text files in the /ChatIO/ directory of the mod. <LINE>
+description= <INDENT:20> * Safehouses have a Zombie Spawn Exclusion Zone.  Right click anywhere on the ground to access the setting. <LINE>
 description= <INDENT:0><LINE>
 description= It is strongly recommended you back up any customised files before updating this mod, as mod updates may clear custom files from the ChatIO directory. <LINE>
 description= <LINE>
