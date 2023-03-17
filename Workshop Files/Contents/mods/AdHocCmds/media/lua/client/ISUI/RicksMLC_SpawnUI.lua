@@ -260,8 +260,16 @@ function RicksMLC_SpawnUI.OnCreatePlayer(playerNumber, player)
     if not player then return end
 
     if isClient() then
+        Events.OnFillWorldObjectContextMenu.Remove(RicksMLC_SpawnUI.OnFillWorldObjectContextMenu) -- to prevent multiple menu items on respawn
         Events.OnFillWorldObjectContextMenu.Add(RicksMLC_SpawnUI.OnFillWorldObjectContextMenu)
     end
 end
 
+function RicksMLC_SpawnUI.OnPlayerDeath(player)
+    if player == getPlayer() then
+        RicksMLC_SpawnUI.instance:close()
+    end
+end
+
 Events.OnCreatePlayer.Add(RicksMLC_SpawnUI.OnCreatePlayer)
+Events.OnPlayerDeath.Add(RicksMLC_SpawnUI.OnPlayerDeath)

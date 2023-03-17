@@ -135,6 +135,9 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		local supplyScript = RicksMLC_ChatSupply:new(chatScriptFile)
 		supplyScript:Supply()
 		return true
+	elseif scriptType == "alarm" then
+		RicksMLC_Alarms.TriggerAlarm()
+		return true
 	end
 	return false
 end

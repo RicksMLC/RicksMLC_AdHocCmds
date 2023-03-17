@@ -30,3 +30,4 @@
 --VendingConfig.txt=immediate
 --ChatSupplyConfig.txt=immediate
 --ChatSupply.txt=immediate
+--TriggerAlarm.txt=immediate
