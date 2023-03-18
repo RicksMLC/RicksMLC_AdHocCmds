@@ -266,7 +266,7 @@ function RicksMLC_SpawnUI.OnCreatePlayer(playerNumber, player)
 end
 
 function RicksMLC_SpawnUI.OnPlayerDeath(player)
-    if player == getPlayer() then
+    if player == getPlayer() and RicksMLC_SpawnUI.instance then
         RicksMLC_SpawnUI.instance:close()
     end
 end
