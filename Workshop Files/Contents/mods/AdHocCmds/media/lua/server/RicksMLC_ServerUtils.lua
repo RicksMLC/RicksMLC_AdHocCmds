@@ -35,9 +35,7 @@ RicksMLC_ServerUtils.OnClientCommand = function(moduleName, command, player, arg
     --DebugLog.log(DebugType.Mod, 'RicksMLC_ServerUtils.OnClientCommand() ' .. moduleName .. "." .. command)
     if RicksMLC_ServerUtils[moduleName] and RicksMLC_ServerUtils[moduleName][command] then
          -- FIXME: Comment out when done?
-        local argStr = ''
- 		for k,v in pairs(args) do argStr = argStr..' '..k..'='..tostring(v) end
- 		DebugLog.log(DebugType.Mod, 'received '..moduleName..' '..command..' '..tostring(player)..argStr)
+        RicksMLC_SpawnCommon.DumpArgs(args, 0, "RicksMLC_ServerUtils.OnClientCommand() '" .. moduleName .. "' '" .. command .. "'")
 
  		RicksMLC_ServerUtils[moduleName][command](player, args)
     end

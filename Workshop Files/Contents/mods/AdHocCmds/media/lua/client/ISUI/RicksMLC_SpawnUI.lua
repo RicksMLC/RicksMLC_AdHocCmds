@@ -196,7 +196,7 @@ function RicksMLC_SpawnUI.onSliderChange(slider, newValue)
     RicksMLC_SpawnUI.instance.safeZoneCtrls.sliderField:setText(tostring(newValue))
 end
 
-function RicksMLC_SpawnUI:createSlider(y, name, defaultValue, onChangeFn, tooltip)
+function RicksMLC_SpawnUI:CreateSlider(y, name, defaultValue, onChangeFn, tooltip)
     local sliderCtrls = {}
 
     sliderCtrls.sliderLabel = ISLabel:new(2, y, 16, name, 1, 1, 1, 1.0, UIFont.Small, true);
@@ -233,15 +233,16 @@ function RicksMLC_SpawnUI:createChildren()
 
     y = th + 10
 
-    self.safeZoneCtrls = self:createSlider(y, "Safe Zone Radius", self.safeZoneRadius, RicksMLC_SpawnUI.onSliderChange, "Safehouse safe zone on the server.  Zombies will not spawn in this area")
+    self.safeZoneCtrls = self:CreateSlider(y, "Safe Zone Radius", self.safeZoneRadius, RicksMLC_SpawnUI.onSliderChange, "Safehouse safe zone on the server.  Zombies will not spawn in this area")
     y = self.safeZoneCtrls.slider:getY() + self.safeZoneCtrls.slider:getHeight() + 10
 
-    self.playerSpawnZoneCtrls = self:createSlider(y, "Player Spawn Zone", 3, RicksMLC_SpawnUI.onSliderChangePlayerZone, "Example player spawn zone radius (not stored)")
+    self.playerSpawnZoneCtrls = self:CreateSlider(y, "Player Spawn Zone", 3, RicksMLC_SpawnUI.onSliderChangePlayerZone, "Example player spawn zone radius (not stored)")
     y = self.playerSpawnZoneCtrls.slider:getY() + self.playerSpawnZoneCtrls.slider:getHeight() + 10
 
-    self.playerSpawnOffsetCtrls = self:createSlider(y, "Player Spawn Offset", 10, RicksMLC_SpawnUI.onSliderChangePlayerOffset,  "Example player spawn zone offset (not stored)")
+    self.playerSpawnOffsetCtrls = self:CreateSlider(y, "Player Spawn Offset", 10, RicksMLC_SpawnUI.onSliderChangePlayerOffset,  "Example player spawn zone offset (not stored)")
     y = self.playerSpawnOffsetCtrls.slider:getY() + self.playerSpawnOffsetCtrls.slider:getHeight() + 10
 
+    -- Safe house and player spawn circles and arrows
     self.safeHouseRangeUI = RicksMLC_SpawnPointUIElement:new("Safehouse Range", self.player, {r = 0.0, g = 0.8, b = 0.2, a = 0.5}, {r = 0.0, g = 0.8, b = 0.2, a = 0.5})
     self.safeZoneSpawnUI = RicksMLC_SpawnPointUIElement:new("Safe Zone Spawn", self.player, {r = 0.8, g = 0.5, b = 0.2, a = 0.5}, {r = 0.8, g = 0.5, b = 0.2, a = 0.5})
     self.playerSpawnZoneUI = RicksMLC_SpawnPointUIElement:new("Player Spawn Zone", self.player, {r = 0.2, g = 0.2, b = 0.8, a = 0.5}, {r = 0.2, g = 0.2, b = 0.8, a = 0.5})

@@ -2,30 +2,6 @@
 -- Note: These are copied from ISWeatherChannel.lua
 
 ---------------------------------------------------------------------------------
--- FIXME: Commented out for now as it looks like the radio broadcast to a non-equipped
---        radio may be controlled in the java component.
---
--- Override the ISRadioWindow:Update so the radio will still work on the belt
---require "RadioCom/ISRadioWindow"
---local origIsRadioWindowUpdate = ISRadioWindow.update
---function ISRadioWindow:update()
---    local radioDevice = self.device
---    local preIsTurnedOn = self.deviceData:getIsTurnedOn()
---
---    origIsRadioWindowUpdate(self)
---
---    if self.device then return end -- The radio window has not been closed
---
---    local postIsTurnedOn = radioDevice:getDeviceData():getIsTurnedOn()
---    if preIsTurnedOn and not postIsTurnedOn then
---        local location = getPlayer():getAttachedItems():getLocation(radioDevice)
---        if location then
---            radioDevice:getDeviceData():setIsTurnedOn(true);
---        end
---    end
---end
-
----------------------------------------------------------------------------------
 
 RicksMLC_Radio = ISBaseObject:derive("RicksMLC_Radio")
 RicksMLC_Radio.channelUUID = "RicksMLC CHAT-1234567"; --required for DynamicRadio
