@@ -39,7 +39,7 @@ type=chatsupplyconfig
 
 -- Supplies:
 food=Crisps,Sandwich,Pop,Plonkies,Burger,BeerBottle,Chardonnay,Wine2,WaterBottleFull,TeaBag2
-health=PillsBeta,PillsAntiDep,Pills,PillsSleepingTablets,PillsVitamins,Tissue
+health=PillsBeta,PillsAntiDep,Pills,PillsSleepingTablets,PillsVitamins,Tissue,Hat_EarMuff_Protectors
 other=Lighter,Cigarettes,WristWatch_Left_DigitalBlack,Needle,Thread,Battery,SharpedStone,MugSpiffo,Woodglue,Spiffo,DeadRat
 clothing=SpiffoSuit,Bag_School,Hat_Raccoon,Hat_SummerHat,Hat_FastFood_IceCream,Hat_FastFood_Spiffo
 

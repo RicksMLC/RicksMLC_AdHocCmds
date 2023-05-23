@@ -70,6 +70,6 @@ tier3=10-14
 tier4=15-20
 
 prizes1=Acorn,Crisps,AxeStone,SackOfNuts
-prizes2=Plonkies,Hammer,Bullets9mmBox,Pistol,9mmClip,SewingKitFull
+prizes2=Plonkies,Hammer,Bullets9mmBox,Pistol,9mmClip,SewingKitFull,Hat_EarMuff_Protectors
 prizes3=Crowbar,PillsBeta,Wine2
 prizes4=Shotgun,ShotgunShellsBox
