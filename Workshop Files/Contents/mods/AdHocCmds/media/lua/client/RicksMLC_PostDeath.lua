@@ -37,23 +37,12 @@ function RicksMLC_SpawnStats:ResetWounds()
     end
 end
 
-function RicksMLC_SpawnStats:AddZombie(zombie, spawner)
-    globalModData = getModData()
-    if not globalModData["RicksMLC_SpawnStats"] then 
-        globalModData["RicksMLC_SpawnStats"] = {}
-    end
-    globalModData["RicksMLC_SpawnStats"][zombie.ZombieId] = { spawner, zombie:getUID() }
-end
-
 -- Store the chatNames in an array so the idx can be used as the value for the spawned zombies spawner data
 function RicksMLC_SpawnStats:AddZombies(chatName, zombieList)
     for i, v in ipairs(self.spawners) do
         if v[1] == chatName then
             for j=0, zombieList:size()-1 do
                 local zombie = zombieList:get(j)
-                -- FIXME: Zombie ID resolution?
-                --local zombieId = zombie.ZombieID
-                --self:AddZombie(zombie, chatName)
                 local zombieId = zombie:getUID()
                 self.spawnedZombies[zombieId] = i
             end
@@ -64,19 +53,35 @@ function RicksMLC_SpawnStats:AddZombies(chatName, zombieList)
     self.spawners[#self.spawners+1] = {chatName, {}}
     for k=0, zombieList:size()-1 do
         local zombie = zombieList:get(k)
-        -- FIXME: Zombie ID resolution?
-        --local zombieId = zombie.ZombieID
-        --self:AddZombie(zombie, chatName)
         local zombieId = zombie:getUID()
         self.spawnedZombies[zombieId] = #self.spawners
     end
 end
 
+-- The server cannot send an IsoZombie to the client, so it is sending the ID instead.
+function RicksMLC_SpawnStats:AddZombiesFromServer(chatName, zombieList)
+    for i, v in ipairs(self.spawners) do
+        if v[1] == chatName then
+            for k, v in pairs(zombieList) do
+                local zombieId = v.zombieId
+                self.spawnedZombies[zombieId] = i
+            end
+            return
+        end
+    end
+    -- If we get here the chatName is not in the list yet, so add it
+    self.spawners[#self.spawners+1] = {chatName, {}}
+    for k, v in pairs(zombieList) do
+        local zombieId = v.zombieId
+        self.spawnedZombies[zombieId] = #self.spawners
+    end
+end
+
+
 function RicksMLC_SpawnStats:RecordWound(zombieId, woundType)
     local spawnerIdx = self.spawnedZombies[zombieId]
     if not spawnerIdx then
         --FIXME: Check if this is a player?
-
     end
     if spawnerIdx then
         if self.spawners[spawnerIdx][2][woundType] then
@@ -201,7 +206,7 @@ function RicksMLC_PostDeath.OnPostDeath(playerObj)
         end
         if #lines["deepWounded"] > 0 then
             table.insert(panel.lines, "_____________________________________")
-            table.insert(panel.lines, "Deep Wounders:                                                           ")
+            table.insert(panel.lines, "Deep Wounders:                                                 ")
             for key, inflictors in pairs(lines["deepWounded"]) do
                 table.insert(panel.lines, "   " .. inflictors[1] .. " x " .. tostring(inflictors[2]))
             end
@@ -215,8 +220,9 @@ function RicksMLC_PostDeath:RecordNewWound(bodyPartType, zombieId, woundId, woun
     if not self.wounds[bodyPartTypeIdx] then
         self.wounds[bodyPartTypeIdx] = {}
     end
+    --DebugLog.log(DebugType.Mod, "RecordNewWound(): '" .. tostring(self.wounds[bodyPartTypeIdx][woundId]) .. "'")
     if not self.wounds[bodyPartTypeIdx][woundId] then
-        --DebugLog.log(DebugType.Mod, "New Wound: " .. wound)
+        --DebugLog.log(DebugType.Mod, "    New Wound of type: " .. tostring(woundId) .. " " .. wound)
         self.wounds[bodyPartTypeIdx][woundId] = zombieId
         RicksMLC_SpawnStats:Instance():RecordWound(zombieId, wound)
     end
@@ -238,6 +244,61 @@ function RicksMLC_PostDeath:RecordNewWounds(bodyPartType, isBitten, isCut, isScr
     end
 end
 
+-- Expeimental code: Commented out for now.
+-- TODO: Get the meth:invoke() working.
+-- function RicksMLC_PostDeath:AttackerReanimatedPlayer(zombie)
+--     local player = self:GetFunctionValueFromIsoZombie(zombie, "getReanimatedPlayer")
+--     if player then
+--         DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:AttackerReanimatedPlayer() Player: '" .. player:getDisplayName() .. "'")
+--         return true
+--     end
+--     return false
+-- end
+--
+-- function RicksMLC_PostDeath:GetFunctionValueFromIsoZombie(zombie, fName)
+--     if not instanceof(zombie, "IsoZombie") then
+--         return nil
+--     end
+--     local c = getNumClassFunctions(zombie);
+--     for i=0, c-1 do
+--         local meth = getClassFunction(zombie, i);
+--         if meth:getName() == fName then
+--             return meth:invoke(zombie)
+--         end
+--     end
+-- end
+--
+-- -- FIXME: Experimental test code for working out subclass fields
+-- function RicksMLC_PostDeath:GetZombieIdFromAttacker(attacker)
+--     if not instanceof(attacker, "IsoZombie") then
+--         return nil
+--     end
+--     local c = getNumClassFields(attacker);
+--     for i=0, c-1 do
+--         local meth = getClassField(attacker, i);
+--         DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetZombieIdFromAttacker() '" .. meth:getName() .. "'")
+--         if meth:getName() == "ZombieID" then
+--             local val = KahluaUtil.rawTostring2(getClassFieldVal(attacker, meth));
+--             return val
+--             --if(val == nil) then val = "nil" end
+--             --local s = tabToX(meth:getType():getSimpleName(), 18) .. " " .. tabToX(meth:getName(), 24) .. " " .. tabToX(val, 24);
+--             --self.objectView:addItem(s, meth);
+--         end
+--     end
+-- end
+
+function RicksMLC_PostDeath:GetZombieId(attacker)
+    -- FIXME: Uncomment this to work out the player
+    -- if self:AttackerReanimatedPlayer(attacker) then return end
+
+    if isClient() or isServer() then
+        -- For multiplayer the UID() is not the same on different clients and the server, so use the online id
+        return attacker:getOnlineID()
+    end
+    -- This is a single player, so the UID is valid.  The online id is always -1 in single player
+    return attacker:getUID()
+end
+
 function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
     if character ~= getPlayer() then return end
 
@@ -253,10 +314,6 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
         -- FIXME: Remove when players can wound other players
         if not attacker:isZombie() then return end
 
-        local zModData = attacker:getModData()
-        local spawnData = zModData["RicksMLC_Spawn"]    -- {self.spawner, numZombies, zId, ZombieID}
-        --DebugLog.log(DebugType.Mod, "Attacker: " .. tostring(spawnData[1]) .. " " .. tostring(spawnData[4]))
-
         local bodyDamage = character:getBodyDamage()
         local bodyPartList = bodyDamage:getBodyParts()
 
@@ -270,9 +327,8 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
                 bodyDamage:IsCut(bodyPartType),
                 bodyDamage:IsScratched(bodyPartType),
                 bodyDamage:IsDeepWounded(bodyPartType),
-                attacker:getUID())
+                self:GetZombieId(attacker))
         end
-        --RicksMLC_SpawnStats:Instance():Dump()
     end
 end
 

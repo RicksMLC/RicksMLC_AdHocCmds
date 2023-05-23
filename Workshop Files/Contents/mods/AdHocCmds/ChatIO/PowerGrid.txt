@@ -1,0 +1,5 @@
+-- PowerGrid.txt
+-- Toggle the power grid.
+
+type=powerGrid
+togglePowerGrid=yes

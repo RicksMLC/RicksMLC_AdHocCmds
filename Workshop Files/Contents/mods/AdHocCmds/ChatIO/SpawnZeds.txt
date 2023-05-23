@@ -43,7 +43,7 @@ type=spawn
 player=
 
 zedname=Harold P. O'Qwerty_01-Jr
-radius=
+radius=3
 offset=10
 facing=yes
 

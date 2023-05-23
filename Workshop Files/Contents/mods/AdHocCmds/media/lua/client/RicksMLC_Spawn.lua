@@ -206,6 +206,9 @@ if isClient() then
 end
 
 -----------------------------------------------
+-- RicksMLC_SpawnHandler is the client-side of the server spawn.
+-- This class receives messages from the server with the list of 
+-- spawned zombies, which is uses to set the zombie dogtags when the client hits them.
 require "ISBaseObject"
 RicksMLC_SpawnHandler = ISBaseObject:derive("RicksMLC_SpawnHandler")
 
@@ -267,10 +270,12 @@ end
 function RicksMLC_SpawnHandler:AddSpawnedZombies(spawnArgs)
     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnHandler:AddSpawnedZombies() ")
     for k, v in pairs(spawnArgs.zombieDogTagList) do
-        self.spawnedZombies[k] = v
+        self.spawnedZombies[k] = v.dogtagLabel
         self.numTrackedZombies = self.numTrackedZombies + 1
         --DebugLog.log(DebugType.Mod, "      " .. tostring(k) .. " " .. self.spawnedZombies[k])
     end
+
+    RicksMLC_SpawnStats:Instance():AddZombiesFromServer(spawnArgs.spawner, spawnArgs.zombieDogTagList)
 
     if RicksMLC_SpawnTestInstance then
         -- Show the spawn result diagnostic for the target player

@@ -1,6 +1,7 @@
 -- RicksMLC_Alarms.lua
 
 -- Trigger an alarm in the nearest building
+-- TODO: Make multiplayer
 
 RicksMLC_Alarms = {}
 function RicksMLC_Alarms.TriggerAlarm()

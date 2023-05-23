@@ -11,6 +11,7 @@ require "ISBaseObject"
 require "RicksMLC_ChatIO"
 require "RicksMLC_Radio"
 require "RicksMLC_ChatSupply"
+require "RicksMLC_PowerGrid"
 
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
@@ -138,6 +139,10 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 	elseif scriptType == "alarm" then
 		RicksMLC_Alarms.TriggerAlarm()
 		return true
+	-- FIXME: Commented out code for now - TogglePower() does not work yet.
+	-- elseif scriptType == "powerGrid" then
+	-- 	RicksMLC_PowerGrid.TogglePower()
+	-- 	return true
 	end
 	return false
 end

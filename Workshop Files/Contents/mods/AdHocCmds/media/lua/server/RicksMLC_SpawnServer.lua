@@ -51,10 +51,10 @@ function RicksMLC_SpawnServer:getInitialStateForClient()
 end
 
 function RicksMLC_SpawnServer:GetZombieDogtagName(zId, numZombies, spawner)
-    local dogTagLabel = self.dogTagDisplayName
+    local dogtagLabel = self.dogTagDisplayName
                         .. ": " .. spawner
                         .. " (" .. tostring(zId) .. " of " .. tostring(numZombies) .. ")"
-    return dogTagLabel
+    return dogtagLabel
 end
 
 function RicksMLC_SpawnServer:AddNewSpawns(spawnResult, spawner)
@@ -71,7 +71,7 @@ function RicksMLC_SpawnServer:AddNewSpawns(spawnResult, spawner)
     end
     self.numTrackedZombies = self.numTrackedZombies + n
 
-    local args = { zombieDogTagList = newSpawnList,  spawnResult = spawnResult, spawnBuildingIds = { buildingId = nil, spawnRoomId = nil }}
+    local args = { zombieDogTagList = newSpawnList,  spawnResult = spawnResult, spawnBuildingIds = { buildingId = nil, spawnRoomId = nil }, spawner = spawner }
     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer:AddNewSpawns() spawnRoomInfo " .. tostring(spawnResult.spawnRoomInfo) .. " buildingDef: " .. tostring(spawnResult.spawnRoomInfo.buildingDef))
     if spawnResult.spawnRoomInfo and spawnResult.spawnRoomInfo.buildingDef then
         -- Convert the objects to Ids so the client can translate them back into objects
@@ -98,7 +98,7 @@ function RicksMLC_SpawnServer:DecorateZombies(fullZombieArrayList, spawner)
         local dogtagLabel = self:GetZombieDogtagName(zId, numZombies, spawner)
         local zombieId = zombie:getOnlineID()
         -- DebugLog.log(DebugType.Mod, "DecorateZombies() '" .. zombieId .. "' '" .. dogtagLabel .. "'")
-        decoratedZombies[zombieId] = dogtagLabel
+        decoratedZombies[zombieId] = { dogtagLabel = dogtagLabel, zombieId = zombie:getOnlineID() }
 		zId = zId + 1
 	end
     return decoratedZombies

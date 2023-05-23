@@ -16,6 +16,7 @@ description= <INDENT:20> * Radio C.H.A.T (106.8MHz) - chat messages will appear 
 description= <INDENT:20> * Toggle storms <LINE>
 description= <INDENT:20> * Chat can supply items to the player inventory <LINE>
 description= <INDENT:20> * Cash in dogtags at Vending Machines for prizes (no refunds) <LINE>
+description= <INDENT:20> * Set the alarm on for the closest building to the player <LINE>
 description= <INDENT:20> * All features listed above are configurable in the text files in the /ChatIO/ directory of the mod. <LINE>
 description= <INDENT:20> * Safehouses have a Zombie Spawn Exclusion Zone.  Right click anywhere on the ground to access the setting. <LINE>
 description= <INDENT:0><LINE>
