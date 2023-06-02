@@ -19,8 +19,10 @@ local b = {1.0, 0.0,  0.0}
 local fonts = {UIFont.AutoNormLarge, UIFont.AutoNormMedium, UIFont.AutoNormSmall, UIFont.Handwritten}
 function RicksMLC_Utils.Think(player, thought, colourNum)
 	-- colourNum 1 = white, 2 = green, 3 = red
-	player:Say(thought, r[colourNum], g[colourNum], b[colourNum], fonts[2], 1, "radio")
-    --player:setHaloNote(thought, r[colourNum], g[colourNum], b[colourNum], 150)
+	-- FIXME: Comment player:Say() out for now. Using the setHaloNote() needs testing "in the field" but works in test here.
+	--  May be hard to read on other streamers depending on their font size settings?
+	--player:Say(thought, r[colourNum], g[colourNum], b[colourNum], fonts[2], 1, "radio")
+    player:setHaloNote(thought, r[colourNum] * 255, g[colourNum] * 255, b[colourNum] * 255, 250)
 end
 
 

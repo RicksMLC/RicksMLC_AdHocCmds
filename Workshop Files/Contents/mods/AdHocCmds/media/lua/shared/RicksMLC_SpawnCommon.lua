@@ -197,6 +197,10 @@ function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     return spawnResult
 end
 
+local function is_array(t)
+    return t ~= nil and type(t) == 'table' and t[1] ~= nil
+end
+
 function RicksMLC_SpawnCommon.DumpArgs(args, lvl, desc)
     if not lvl then lvl = 0 end
     if lvl == 0 then
@@ -207,11 +211,21 @@ function RicksMLC_SpawnCommon.DumpArgs(args, lvl, desc)
     for i = 1, lvl do
         argIndent = argIndent .. "   "
     end
-    for k,v in pairs(args) do 
-        local argStr = argIndent .. ' ' .. k .. '=' .. tostring(v) 
-        DebugLog.log(DebugType.Mod, argStr)
-        if type(v) == "table" then
-            RicksMLC_SpawnCommon.DumpArgs(v, lvl + 1)
+    if is_array(args) then
+        for idx, v in ipairs(args) do 
+            local argStr = argIndent .. ' [' .. idx .. ']=' .. tostring(v) 
+            DebugLog.log(DebugType.Mod, argStr)
+            if type(v) == "table" then
+                RicksMLC_SpawnCommon.DumpArgs(v, lvl + 1)
+            end
+        end
+    elseif type(args) == "table" then
+        for k, v in pairs(args) do 
+            local argStr = argIndent .. ' ' .. k .. '=' .. tostring(v) 
+            DebugLog.log(DebugType.Mod, argStr)
+            if type(v) == "table" then
+                RicksMLC_SpawnCommon.DumpArgs(v, lvl + 1)
+            end
         end
     end
     if lvl == 0 then

@@ -1,8 +1,13 @@
 -- Rick's MLC AdHocCmds - Twitch streaming interface if you have TouchPortal or something like that
 -- TODO:
---		 [+] Use the radio to report changes caused by "Unusual Unknown Circumstances"
---				Chaos Happens At Times - C.H.A.T. Radio
-
+-- 		[ ] RicksMLC_SpawnUI.lua: Show all safe houses, and checkbox for "show my safehouse"
+--		[ ] Add a designator for the Chat so we know which zombies are from what streamer
+--		[ ] Add post-death notice with Chat as well as Chatter caused the death.
+--		[ ] Keep a score for each player Kills/Killed By
+--		[ ] Make a UI for the score.
+--		[ ] Output the score to a ChatIO file so the streamrs can use it.
+--
+--
 -- Note: https://projectzomboid.com/modding/index.html
 -- Note: https://pzwiki.net/wiki/Category:Lua_Events
 -- Touchportal
@@ -392,7 +397,8 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 
 	if not RicksMLC_AdHocCmdsInstance then return end
 
-	if isClient() and not isCoopHost() then return end -- Prevent non hosts from sending updates to the server
+	-- FIXME: Remove so it triggers immediate.
+	-- if isClient() and not isCoopHost() then return end -- Prevent non hosts from sending updates to the server
 
 	--if isAltKeyDown() then
 		if key == Keyboard.KEY_F9 then

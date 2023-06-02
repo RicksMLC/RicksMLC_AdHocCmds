@@ -1,5 +1,9 @@
 -- RicksMLC_SpawnUI.lua
 
+-- TODO: Update so it shows all safehouses
+--       Show your own safehouse in green and the other in.. some other colour.
+--       Update with checkbox to always show your own safe house
+
 require "ISUI/ISPanel"
 require "ISUI/ISCollapsableWindow"
 

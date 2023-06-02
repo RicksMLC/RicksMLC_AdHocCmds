@@ -34,8 +34,7 @@ end
 RicksMLC_ServerUtils.OnClientCommand = function(moduleName, command, player, args)
     --DebugLog.log(DebugType.Mod, 'RicksMLC_ServerUtils.OnClientCommand() ' .. moduleName .. "." .. command)
     if RicksMLC_ServerUtils[moduleName] and RicksMLC_ServerUtils[moduleName][command] then
-         -- FIXME: Comment out when done?
-        RicksMLC_SpawnCommon.DumpArgs(args, 0, "RicksMLC_ServerUtils.OnClientCommand() '" .. moduleName .. "' '" .. command .. "'")
+        --RicksMLC_SpawnCommon.DumpArgs(args, 0, "RicksMLC_ServerUtils.OnClientCommand() '" .. moduleName .. "' '" .. command .. "'")
 
  		RicksMLC_ServerUtils[moduleName][command](player, args)
     end
@@ -45,17 +44,14 @@ local RicksMLC_ModName = "RicksMLC_AdHocCmds"
 local ZomboidPath = "./ChatIO/"
 
 function RicksMLC_ServerUtils.WriteUserNames()
-	DebugLog.log(DebugType.Mod, "RicksMLC_ServerUtils.WriteUserNames()")
-	local luaFileWriter = getModFileWriter(RicksMLC_ModName, ZomboidPath .. "usernames.txt", true, false) 
-	if luaFileWriter then
-        local playerList = getOnlinePlayers()
-        for i = 0, playerList:size()-1 do
-            line = playerList:get(i):getUsername()
-			luaFileWriter:writeln(line)
-            DebugLog.log(DebugType.Mod, "   username: '" .. line .. "'")
-		end
-	end
-	luaFileWriter:close()
+	--DebugLog.log(DebugType.Mod, "RicksMLC_ServerUtils.WriteUserNames()")
+    local playerList = getOnlinePlayers()
+    local players = {}
+    for i = 0, playerList:size()-1 do
+        players[#players+1] = playerList:get(i):getUsername()
+    end
+    local args = { players = players }
+    sendServerCommand("RicksMLC_ServerCmds", "WriteUserNamesFromServer", args)
 end
 
 Events.OnClientCommand.Add(RicksMLC_ServerUtils.OnClientCommand)
