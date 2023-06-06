@@ -37,6 +37,18 @@ function RicksMLC_SpawnStats:ResetWounds()
     end
 end
 
+function RicksMLC_SpawnStats:AddPlayerZombie(chatName, zombieId)
+    for i, v in ipairs(self.spawners) do
+        if v[1] == chatName then
+            self.spawnedZombies[zombieId] = i
+            return
+        end
+    end
+    -- If we get here the chatName has not been added yet
+    self.spawners[#self.spawners+1] = {chatName, {}}
+    self.spawnedZombies[zombieId] = #self.spawners
+end
+
 -- Store the chatNames in an array so the idx can be used as the value for the spawned zombies spawner data
 function RicksMLC_SpawnStats:AddZombies(chatName, zombieList)
     for i, v in ipairs(self.spawners) do
@@ -244,17 +256,24 @@ function RicksMLC_PostDeath:RecordNewWounds(bodyPartType, isBitten, isCut, isScr
     end
 end
 
+-- Commented out code: The player = zombie:getReanimatedPlayer() return nil, and it should not?
+--  I have asked this question on the IndieStone discord. 04/06/2023
+function RicksMLC_PostDeath:AttackerReanimatedPlayer(zombie)
+    -- if zombie:isReanimatedPlayer() then
+    --     DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:AttackerReanimatedPlayer() reanimated player")
+    --     local player = zombie:getReanimatedPlayer()
+    --     DebugLog.log(DebugType.Mod, "   player: " .. tostring(player))
+    --     -- local player = self:GetFunctionValueFromIsoZombie(zombie, "getReanimatedPlayer")
+    --     if player then
+    --         DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:AttackerReanimatedPlayer() Player: '" .. player:getDisplayName() .. "'")
+    --         return true
+    --     end
+    --     return false
+    -- end
+end
+
 -- Expeimental code: Commented out for now.
 -- TODO: Get the meth:invoke() working.
--- function RicksMLC_PostDeath:AttackerReanimatedPlayer(zombie)
---     local player = self:GetFunctionValueFromIsoZombie(zombie, "getReanimatedPlayer")
---     if player then
---         DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:AttackerReanimatedPlayer() Player: '" .. player:getDisplayName() .. "'")
---         return true
---     end
---     return false
--- end
---
 -- function RicksMLC_PostDeath:GetFunctionValueFromIsoZombie(zombie, fName)
 --     if not instanceof(zombie, "IsoZombie") then
 --         return nil
@@ -263,6 +282,13 @@ end
 --     for i=0, c-1 do
 --         local meth = getClassFunction(zombie, i);
 --         if meth:getName() == fName then
+--             if meth.getReturnType and meth:getReturnType().getSimpleName then -- is it exposed?
+--                 DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetFunctionValueFromIsoZombie()" .. fName .. " is exposed")
+--             else
+--                 DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetFunctionValueFromIsoZombie()" .. fName .. " is NOT exposed")
+--             end
+--             local player = zombie:getReanimatedPlayer()
+--             DebugLog.log(DebugType.Mod, "   getReanimatedPlayer: '" .. player:getDisplayName() .. "'")
 --             return meth:invoke(zombie)
 --         end
 --     end
@@ -288,8 +314,10 @@ end
 -- end
 
 function RicksMLC_PostDeath:GetZombieId(attacker)
-    -- FIXME: Uncomment this to work out the player
-    -- if self:AttackerReanimatedPlayer(attacker) then return end
+    -- FIXME: Uncomment this to work out the player.  Commented out for now as the player = zombie:getReanimatedPlayer() returns nil
+    if self:AttackerReanimatedPlayer(attacker) then 
+        DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetZombieId() Attacker is ex-player")
+    end
 
     if isClient() or isServer() then
         -- For multiplayer the UID() is not the same on different clients and the server, so use the online id
@@ -299,8 +327,14 @@ function RicksMLC_PostDeath:GetZombieId(attacker)
     return attacker:getUID()
 end
 
+function RicksMLC_PostDeath:GetPlayerZombieName()
+    if isClient() then
+        return "Some Player"
+    end
+    return "Your Dumb Self"
+end
+
 function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
-    if character ~= getPlayer() then return end
 
     local oldStateName = character:getPreviousStateName()
     local newStateName = character:getCurrentStateName()
@@ -309,12 +343,31 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
     -- Zombie Damage Player Sequence:
     --  Zombie: LungeState -> AttackState
     --  Player: IdleState(?) -> PlayerHitReactionState
-    if newStateName == "PlayerHitReactionState" then
-        local attacker = character:getAttackedBy() -- make sure this is a zombie, and not another player?
-        -- FIXME: Remove when players can wound other players
-        if not attacker:isZombie() then return end
+    -- Note: Sometimes the player will not go into a PlayerHitReactionState if multiple zombies attack so
+    --       check the AttackState events for zombie targets as potential victims to check the new damage.
+    if newStateName == "PlayerHitReactionState" or newStateName == "AttackState" then
 
-        local bodyDamage = character:getBodyDamage()
+        local victim = character
+        local attacker = character
+        if character:isZombie() then
+            victim = character:getTarget()
+        else
+            attacker = victim:getAttackedBy()
+        end
+
+        -- We only care if the victim is the player.  Don't record injuries for other players.
+        if victim ~= getPlayer() then return end
+
+        -- FIXME: Remove: zombie modData is not persistent, so this doesn't help at all
+        -- local modData = attacker:getModData()
+        -- RicksMLC_SpawnCommon.DumpArgs(modData, 1, "RicksMLC_PostDeath:HandleOnAIStateChange()")
+
+        if attacker:isReanimatedPlayer() then
+            --DebugLog.log(DebugType.Mod, "   Is a Player!")
+            RicksMLC_SpawnStats.Instance():AddPlayerZombie(self:GetPlayerZombieName(), self:GetZombieId(attacker))
+        end
+
+        local bodyDamage = victim:getBodyDamage()
         local bodyPartList = bodyDamage:getBodyParts()
 
         for i=0, bodyPartList:size()-1 do
@@ -328,7 +381,7 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
                 bodyDamage:IsScratched(bodyPartType),
                 bodyDamage:IsDeepWounded(bodyPartType),
                 self:GetZombieId(attacker))
-        end
+        end    
     end
 end
 
