@@ -163,7 +163,7 @@ function RicksMLC_SpawnUI:UpdateServerSafeZoneRadius()
     if isClient() and (isCoopHost() or isAdmin()) then
         if RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius ~= self.safeZoneRadius then
             local args = { safeZoneRadius = self.safeZoneRadius }
-            --RicksMLC_SpawnCommon.DumpArgs(args, 0, "RicksMLC_SpawnUI:UpdateServerSafeZoneRadius()")
+            --RicksMLC_SharedUtils.DumpArgs(args, 0, "RicksMLC_SpawnUI:UpdateServerSafeZoneRadius()")
             sendClientCommand(getPlayer(), 'RicksMLC_Zombies', 'UpdateSafeZoneFromClient', args)
         end
     end

@@ -31,3 +31,4 @@
 --ChatSupplyConfig.txt=immediate
 --ChatSupply.txt=immediate
 --TriggerAlarm.txt=immediate
+--Radio.txt=immediate

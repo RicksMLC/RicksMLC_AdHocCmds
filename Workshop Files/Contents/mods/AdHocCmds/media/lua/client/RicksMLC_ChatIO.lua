@@ -6,6 +6,7 @@
 -- [+] how? https://zomboid-javadoc.com/41.65/zombie/Lua/LuaManager.GlobalObject.html#getModFileWriter(java.lang.String,java.lang.String,boolean,boolean)
 --     Looks like args are: getModFileWriter(modName, path, isCreateNew, isAppend)
 --
+-- Core.getMyDocumentFolder() .. getFileSeparator() .. "mods" .. getFileSeparator() .. "RicksMLC_AdHocCmds_Data"
 -- https://projectzomboid.com/modding/index.html
 
 require "ISBaseObject"
@@ -59,7 +60,7 @@ end
 function RicksMLC_ChatIO:Load(delim, resetComments)
 	--DebugLog.log(DebugType.Mod, "RicksMLC_ChatIO:Load()")
 	local fileReader = getModFileReader(self.modName, self.saveFilePath, true)
-	if fileReader:ready() then
+	if fileReader and fileReader:ready() then
 		self.contentList = {}
 		self.commentLines = {}
 		local line = fileReader:readLine()

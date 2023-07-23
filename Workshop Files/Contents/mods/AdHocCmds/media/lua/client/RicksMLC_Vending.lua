@@ -116,14 +116,25 @@ function RicksMLC_VendingMachineConfig:UpdatePrizes(vendingConfigFile)
     self:UpdateAttribute(vendingConfigFile, self.prizes, "prizes", ",")
 end
 
+local function reportVendingError(errorMsg)
+    RicksMLC_Utils.Think(getPlayer(), errorMsg, 3) -- Error message is red
+    DebugLog.log(DebugType.Mod, "RicksMLC_Vending reportError() '" .. errorMsg .. "'")
+end
+
 function RicksMLC_VendingMachineConfig:MakeContainer(containerList)
     -- Returns: ContainerItem with items.
 
     local container = InventoryItemFactory.CreateItem(containerList[2])
+    if not container then
+        reportVendingError("Container '" .. tostring(containerList[2]) .. "' of '" .. containerList[1] .. "' does not exist - check spelling and existence")
+        return nil
+    end
     for i=3,#containerList do 
         local item = InventoryItemFactory.CreateItem(containerList[i])
         if item then
             container:getInventory():AddItem(item)
+        else
+            reportVendingError("Item '" .. tostring(containerList[i]) .. "' of '" .. containerList[1] .. "' does not exist.")
         end
     end
     return container
@@ -138,7 +149,10 @@ function RicksMLC_VendingMachineConfig:AddContainerPrizes(vendingConfigFile)
     local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
     while attribLine do
         local attribList = RicksMLC_Utils.SplitStr(attribLine, ",")
-        self.containers[attribList[1]] = self:MakeContainer(attribList)
+        local newContainer = self:MakeContainer(attribList)
+        if newContainer then
+            self.containers[attribList[1]] = newContainer
+        end
         i = i + 1
         attribLine = vendingConfigFile:Get(attribName .. tostring(i))
     end
@@ -346,7 +360,12 @@ function RicksMLC_Vending.AddPrize(invPage, numZombies)
         if container then
             prize = container
         else
+            -- TODO: Check for null prize
             prize = InventoryItemFactory.CreateItem(prizeType)
+            if not prize then
+                reportVendingError("Prize '" .. tostring(prizeType) .. "' does not exist. Check spelling and reality")
+                return
+            end
         end
     else
         prize = prizeType

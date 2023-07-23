@@ -79,7 +79,7 @@ function RicksMLC_SpawnServer:AddNewSpawns(spawnResult, spawner)
         args.spawnBuildingIds.buildingId = spawnResult.spawnRoomInfo.buildingDef:getID()
         args.spawnBuildingIds.spawnRoomId = spawnResult.spawnRoomInfo.spawnRoomDef:getID()
     end
-    --RicksMLC_SpawnCommon.DumpArgs(args, 0, "Server:HandleSpawnedZombies")
+    --RicksMLC_SharedUtils.DumpArgs(args, 0, "Server:HandleSpawnedZombies")
     sendServerCommand('RicksMLC_SpawnHandler', 'HandleSpawnedZombies', args)
 end
 

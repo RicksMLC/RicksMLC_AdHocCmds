@@ -37,15 +37,15 @@ function RicksMLC_SpawnStats:ResetWounds()
     end
 end
 
-function RicksMLC_SpawnStats:AddPlayerZombie(chatName, zombieId)
+function RicksMLC_SpawnStats:AddPlayerZombie(playerName, zombieId)
     for i, v in ipairs(self.spawners) do
-        if v[1] == chatName then
+        if v[1] == playerName then
             self.spawnedZombies[zombieId] = i
             return
         end
     end
     -- If we get here the chatName has not been added yet
-    self.spawners[#self.spawners+1] = {chatName, {}}
+    self.spawners[#self.spawners+1] = {playerName, {}}
     self.spawnedZombies[zombieId] = #self.spawners
 end
 
@@ -68,6 +68,24 @@ function RicksMLC_SpawnStats:AddZombies(chatName, zombieList)
         local zombieId = zombie:getUID()
         self.spawnedZombies[zombieId] = #self.spawners
     end
+end
+
+function RicksMLC_SpawnStats:GetZombieHits()
+    local zombieHits = {}
+    for i, chatInfo in ipairs(self.spawners) do
+        -- chatInfo is a list of {chatName, { {woundtype, count}, {woundType, count}, ...} }
+        local chatName = chatInfo[1]
+        local woundList = chatInfo[2]
+        for woundName, woundCount in pairs(woundList) do
+            -- Just use the existence of a woundCount to report a wound happened.. the actual number does not matter.
+            if not zombieHits[chatName] then
+                zombieHits[chatName] = 1
+            else
+                zombieHits[chatName] = zombieHits[chatName] + 1
+            end
+        end
+    end
+    return zombieHits
 end
 
 -- The server cannot send an IsoZombie to the client, so it is sending the ID instead.
@@ -223,8 +241,12 @@ function RicksMLC_PostDeath.OnPostDeath(playerObj)
                 table.insert(panel.lines, "   " .. inflictors[1] .. " x " .. tostring(inflictors[2]))
             end
         end
+        -- TODO: Uncomment to develop: Chat Vs Chat update
+        -- if RicksMLC_ChatVsChatInstance then
+        --     DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath.OnPostDeath()")
+        --     RicksMLC_ChatVsChatInstance:AddDeath(playerObj)
+        -- end
     end
-  
 end
 
 function RicksMLC_PostDeath:RecordNewWound(bodyPartType, zombieId, woundId, wound)
@@ -315,9 +337,9 @@ end
 
 function RicksMLC_PostDeath:GetZombieId(attacker)
     -- FIXME: Uncomment this to work out the player.  Commented out for now as the player = zombie:getReanimatedPlayer() returns nil
-    if self:AttackerReanimatedPlayer(attacker) then 
-        DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetZombieId() Attacker is ex-player")
-    end
+    -- if self:AttackerReanimatedPlayer(attacker) then 
+    --     DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath:GetZombieId() Attacker is ex-player")
+    -- end
 
     if isClient() or isServer() then
         -- For multiplayer the UID() is not the same on different clients and the server, so use the online id
@@ -345,7 +367,7 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
     --  Player: IdleState(?) -> PlayerHitReactionState
     -- Note: Sometimes the player will not go into a PlayerHitReactionState if multiple zombies attack so
     --       check the AttackState events for zombie targets as potential victims to check the new damage.
-    if newStateName == "PlayerHitReactionState" or newStateName == "AttackState" then
+    if newStateName == "AttackState" then
 
         local victim = character
         local attacker = character
@@ -360,7 +382,7 @@ function RicksMLC_PostDeath:HandleOnAIStateChange(character, newState, oldState)
 
         -- FIXME: Remove: zombie modData is not persistent, so this doesn't help at all
         -- local modData = attacker:getModData()
-        -- RicksMLC_SpawnCommon.DumpArgs(modData, 1, "RicksMLC_PostDeath:HandleOnAIStateChange()")
+        -- RicksMLC_SharedUtils.DumpArgs(modData, 1, "RicksMLC_PostDeath:HandleOnAIStateChange()")
 
         if attacker:isReanimatedPlayer() then
             --DebugLog.log(DebugType.Mod, "   Is a Player!")

@@ -280,7 +280,7 @@ function RicksMLC_SpawnHandler:AddSpawnedZombies(spawnArgs)
     if RicksMLC_SpawnTestInstance then
         -- Show the spawn result diagnostic for the target player
         if getPlayer():getUsername() == spawnArgs.spawnResult.targetPlayerName then
-            --RicksMLC_SpawnCommon.DumpArgs(spawnArgs, 0, "Client:AddSpawnedZombies()")
+            --RicksMLC_SharedUtils.DumpArgs(spawnArgs, 0, "Client:AddSpawnedZombies()")
             RicksMLC_SpawnTestInstance:ShowSpawnResult(spawnArgs.spawnResult, spawnArgs.spawnBuildingIds)
         end
     end

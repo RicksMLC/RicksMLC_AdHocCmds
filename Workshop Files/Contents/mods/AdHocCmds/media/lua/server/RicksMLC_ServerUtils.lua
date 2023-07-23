@@ -34,7 +34,7 @@ end
 RicksMLC_ServerUtils.OnClientCommand = function(moduleName, command, player, args)
     --DebugLog.log(DebugType.Mod, 'RicksMLC_ServerUtils.OnClientCommand() ' .. moduleName .. "." .. command)
     if RicksMLC_ServerUtils[moduleName] and RicksMLC_ServerUtils[moduleName][command] then
-        --RicksMLC_SpawnCommon.DumpArgs(args, 0, "RicksMLC_ServerUtils.OnClientCommand() '" .. moduleName .. "' '" .. command .. "'")
+        --RicksMLC_SharedUtils.DumpArgs(args, 0, "RicksMLC_ServerUtils.OnClientCommand() '" .. moduleName .. "' '" .. command .. "'")
 
  		RicksMLC_ServerUtils[moduleName][command](player, args)
     end

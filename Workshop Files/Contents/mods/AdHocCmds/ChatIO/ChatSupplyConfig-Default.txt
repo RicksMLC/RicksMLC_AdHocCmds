@@ -45,5 +45,6 @@ clothing=SpiffoSuit,Bag_School,Hat_Raccoon,Hat_SummerHat,Hat_FastFood_IceCream,H
 
 -- Weapons:
 melee=BaseballBat,Crowbar,GardenHoe,CanoePaddle,AxeStone,Axe
-guns=Pistol,9mmClip,Bullets9mmBox,Shotgun,ShotgunShellsBox
+guns=Pistol,9mmClip,Shotgun,
+ammo=Bullets9mmBox,ShotgunShellsBox
 rare=Sledgehammer
