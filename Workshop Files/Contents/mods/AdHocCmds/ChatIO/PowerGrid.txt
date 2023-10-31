@@ -1,5 +1,8 @@
 -- PowerGrid.txt
--- Toggle the power grid.
+-- Toggle the power grid or brownout the power
 
 type=powerGrid
-togglePowerGrid=yes
+action=BrownOut
+minutes=3
+
+restoreDays=1
