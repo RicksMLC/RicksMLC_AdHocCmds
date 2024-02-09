@@ -101,5 +101,6 @@ function RicksMLC_Radio.Init()
     RicksMLC_Radio.OnLoadRadioScripts(RadioScriptManager.getInstance(), _isNewGame)
 end
 
+-- Commented out: The OnLoadRadioScripts event does not seem to trigger - call manually in Init() instead
 --Events.OnLoadRadioScripts.Add(RicksMLC_Radio.OnLoadRadioScripts)
---Events.OnGameStart.Add(RicksMLC_Radio.OnGameStart)
+

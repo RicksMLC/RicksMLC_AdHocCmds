@@ -28,7 +28,10 @@
             "type": "shell",
             "command": "del",
             "args": [
-                "${env:USERPROFILE}\\Zomboid\\Workshop\\RicksMLC_AdHocCmds\\Contents\\mods\\AdHocCmds\\media\\lua\\client\\Tests"
+                "-Path",
+                "${env:USERPROFILE}\\Zomboid\\Workshop\\RicksMLC_AdHocCmds\\Contents\\mods\\AdHocCmds\\media\\lua\\client\\Tests",
+                ",",
+                "${env:USERPROFILE}\\Zomboid\\Workshop\\RicksMLC_AdHocCmds\\Contents\\mods\\AdHocCmds\\ChatIO\\"
             ],
             "problemMatcher": [],
             "group": {

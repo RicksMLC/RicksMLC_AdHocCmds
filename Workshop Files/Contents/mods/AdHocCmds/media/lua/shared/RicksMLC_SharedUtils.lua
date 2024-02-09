@@ -83,4 +83,31 @@ function RicksMLC_SharedUtils.DumpArgs(args, lvl, desc)
 end
 
 
+local roman_numerals = {
+    {1000, "M"},
+    {900, "CM"},
+    {500, "D"},
+    {400, "CD"},
+    {100, "C"},
+    {90, "XC"},
+    {50, "L"},
+    {40, "XL"},
+    {10, "X"},
+    {9, "IX"},
+    {5, "V"},
+    {4, "IV"},
+    {1, "I"}
+  }
+  
+function RicksMLC_SharedUtils.to_roman(num)
+    local roman = ""
+    for _, numeral in ipairs(roman_numerals) do
+        while num >= numeral[1] do
+        roman = roman .. numeral[2]
+        num = num - numeral[1]
+        end
+    end
+    return roman
+end
+
 Events.OnServerCommand.Add(RicksMLC_SharedUtils.OnServerCommand)

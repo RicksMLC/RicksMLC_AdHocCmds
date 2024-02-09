@@ -1,0 +1,12 @@
+-- ChatTreasureHunt.txt
+
+type=treasureHunt
+
+-- Set the Name= to the name of the chatter
+Name=ChatTreasureUniqueName
+
+-- Town can be blank (random) or one of the following: Muldraugh Rosewood Riverside Westpoint MarchRidge Louisville
+Town=
+Barricades=60
+Zombies=5
+Treasure=Money

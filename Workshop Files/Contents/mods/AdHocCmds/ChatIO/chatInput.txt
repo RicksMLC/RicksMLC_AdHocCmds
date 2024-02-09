@@ -22,6 +22,9 @@
 --      vendingconfig       Configure the Vending Machine prizes for cashing in dogtags
 --      chatsupplyconfig    Configure the chat supply items to the player inventory.
 --      chatsupply          Trigger supplying an item to the player inventory from the categories defined in chatsupplyconfig.
+--      treasureHunt        Send the player on a great adventure
+--      lostTreasureMap     Resets the Treasure Hunt so the next hit zombie supplies the active Treasure Maps
+--      powerGrid           Brownout the power - scary at night
 
 --ChatPot.txt=hourly
 --WeatherGod.txt=immediate
@@ -32,3 +35,5 @@
 --ChatSupply.txt=immediate
 --TriggerAlarm.txt=immediate
 --Radio.txt=immediate
+--ChatTreasureHunt=immediate
+--PowerGrid=immediate

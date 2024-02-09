@@ -48,11 +48,6 @@ function RicksMLC_ChatVsChat:AddDeath(player)
     self:Dump()
 end
 
-function RicksMLC_ChatVsChat:Dump()
-    DebugLog.log(DebugType.Mod, "RicksMLC_ChatVsChat:Dump()")
-    RicksMLC_SharedUtils.DumpArgs(self.deathNotes, 1, "RicksMLC_ChatVsChat")
-end
-
 function RicksMLC_ChatVsChat:new()
 	local o = {}
 	setmetatable(o, self)
@@ -65,7 +60,8 @@ function RicksMLC_ChatVsChat:new()
     return o
 end
 
-function RicksMLC_ChatVsChat:dump()
+function RicksMLC_ChatVsChat:Dump()
+    DebugLog.log(DebugType.Mod, "RicksMLC_ChatVsChat:Dump()")
     RicksMLC_SharedUtils.DumpArgs(self.deathNotes, 1, "RicksMLC_ChatVsChat:dump() deathNotes")
     RicksMLC_SharedUtils.DumpArgs(self.killNotes, 1, "RicksMLC_ChatVsChat:dump() killNotes")
 end

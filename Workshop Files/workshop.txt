@@ -1,5 +1,5 @@
 version=0.9
-title=Rick's MLC AdHocCmds (Twitch/YouTube chat interaction)
+title=Rick's MLC AdHocCmds (TEST) (Twitch/YouTube chat interaction)
 description= Chat integration tool to allow chat to interact with the player if you have TouchPortal or Streamer.bot. 
 description= 
 description= This tool uses .txt files to update control and trigger actions in the game.
@@ -27,4 +27,4 @@ description= custom files from the ChatIO directory.
 description= 
 description= Vending Machine Sound Effect used under Creative Commons from YouTuber "@Free High Quality Sound FX"
 tags=Build 41
-visibility=public
+visibility=Unlisted

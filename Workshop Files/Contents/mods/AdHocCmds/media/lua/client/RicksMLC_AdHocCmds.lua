@@ -18,6 +18,8 @@ require "RicksMLC_Radio"
 require "RicksMLC_ChatSupply"
 require "RicksMLC_Flies"
 require "RicksMLC_PowerGrid"
+require "RicksMLC_TreasureHuntMgr"
+require "RicksMLC_ChatTreasure"
 
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
@@ -147,7 +149,11 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		return true
 	elseif scriptType == "toggleflies" then
 		if RicksMLC_Flies then
-			RicksMLC_Flies.ToggleFlies()
+			if isClient() then
+				RicksMLC_ChatFliesClient.SendSetFlies(not RicksMLC_Flies.IsEnabled())
+			else
+				RicksMLC_Flies.ToggleFlies()
+			end
 		end
 		return true
 	elseif scriptType == "powerGrid" then
@@ -155,6 +161,16 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 			RicksMLC_PowerGrid.Instance():BrownOut(chatScriptFile.contentList["minutes"])
 		else
 			RicksMLC_PowerGrid.Instance():TogglePower(tonumber(chatScriptFile.contentList["restoreDays"]))
+		end
+		return true
+	elseif scriptType == "treasureHunt" then
+		if RicksMLC_TreasureHuntMgr then
+			RicksMLC_ChatTreasure.Instance():AddTreasureHunt(chatScriptFile.contentList)
+		end
+		return true
+	elseif scriptType == "lostTreasureMap" then
+		if RicksMLC_TreasureHuntMgr then
+			RicksMLC_ChatTreasure.Instance():ResetLostMaps()
 		end
 		return true
 	end
@@ -444,6 +460,7 @@ function RicksMLC_AdHocCmds.OnGameStart()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
 	RicksMLC_Radio.Init()
+	RicksMLC_ChatTreasure.Instance():Init()
 
 	Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
 	Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)

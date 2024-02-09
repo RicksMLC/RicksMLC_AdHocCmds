@@ -243,8 +243,8 @@ function RicksMLC_PostDeath.OnPostDeath(playerObj)
         end
         -- TODO: Uncomment to develop: Chat Vs Chat update
         -- if RicksMLC_ChatVsChatInstance then
-        --     DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath.OnPostDeath()")
-        --     RicksMLC_ChatVsChatInstance:AddDeath(playerObj)
+            --     DebugLog.log(DebugType.Mod, "RicksMLC_PostDeath.OnPostDeath()")
+            --     RicksMLC_ChatVsChatInstance:AddDeath(playerObj)
         -- end
     end
 end
