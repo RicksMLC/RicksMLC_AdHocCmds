@@ -53,44 +53,65 @@ end
 local function DirtyHand(handId)
     local visual = getPlayer():getHumanVisual()
     -- body parts: BodyPartType Hand_L Hand_R
-    local part = BloodBodyPartType.FromIndex(handId)
-    local totalBlood = visual:getBlood(part)
-    local totalDirt = visual:getDirt(part)
+    local totalBlood = visual:getBlood(handId)
+    local totalDirt = visual:getDirt(handId)
     return {Dirt = totalDirt, Blood = totalBlood}
 end
 
-local function VisualChatDecorator(mapUI, x, y, visualDecoratorData)
-    --overlayPNG(mapUI, 8500, 7320, 0.333, "legend", "media/textures/worldMap/Legend.png")
+local function RandomOffset(min, max)
+    local n = (ZombRand(1, 100) <= 50 and 1) or -1
+    return ZombRand(min, max) * n
+end
+
+-- DrawHandPrints
+--  hand:       "Left" or "Right" (case sensitive)
+--  mapSide :   -1 for left, +1 for right
+local function DrawHandPrints(mapUI, x, y, visualDecoratorData, hand, mapSide)
+    local handPrints = hand .. "HandPrints"
+    local scale = 0.75
+    local layerName = "legend"
+    local tex = "media/textures/worldMap/" .. hand .. "Hand1.png"
+    local alpha = 0.1
+    local handType = (hand == "Left" and BloodBodyPartType.Hand_L) or BloodBodyPartType.Hand_R
+    local dirtyHand = DirtyHand(handType)
+    if not visualDecoratorData[handPrints] then
+        visualDecoratorData[handPrints] = {}
+    end
+
+    visualDecoratorData[handPrints][#visualDecoratorData[handPrints]+1] = {
+        DirtyHand = dirtyHand,
+        X = x + (ZombRand(300, 500) * mapSide),
+        Y = y + RandomOffset(250, 350)
+    }
+
+    for i, v in ipairs(visualDecoratorData[handPrints]) do
+        alpha = math.max(v.DirtyHand.Blood, v.DirtyHand.Dirt)
+        RicksMLC_MapUtils.OverlayPNG(mapUI, v.X, v.Y, scale, layerName, tex, alpha)    
+    end
+    return visualDecoratorData
+end
+
+
+local function DrawCoffeeStain(mapUI, x, y, visualDecoratorData)
     local scale = 1
     local layerName = "legend"
     local tex = "media/textures/worldMap/CoffeeStain2.png"
     local alpha = 0.5
 
-    -- local leftHandDirty = DirtyHand(BodyPartType.Hand_L)
-    -- local rightHandDirty = DirtyHand(BodyPartType.Hand_R)
-
     -- Randomise the location of the coffee stain
-    if visualDecoratorData then
-        x = visualDecoratorData.X
-        y = visualDecoratorData.Y
-        -- if visualDecorator.DirtyLeftHand < leftHandDirty then
-        --     visualDecorator.DirtyLeftHand = leftHandDirty
-        -- end
-        -- if visualDecorator.DirtyRightHand < rightHandDirty then
-        --     visualDecorator.DirtyRightHand = rightHandDirty
-        -- end
-    else
+    if not visualDecoratorData or visualDecoratorData.X then
         visualDecoratorData = {}
-        local dX = (ZombRand(1, 100) <= 50 and 1) or -1
-        local dY = (ZombRand(1, 100) <= 50 and 1) or -1
-        visualDecoratorData.X = x + (ZombRand(200, 400) * dX)
-        visualDecoratorData.Y = y + (ZombRand(200, 400) * dY)
-        -- visualDecoratorData.DirtyLeftHand = leftHandDirty
-        -- visualDecoratorData.DirtyRightHand = rightHandDirty
-        x = visualDecoratorData.X
-        y = visualDecoratorData.Y
+        visualDecoratorData.CoffeeStain = { X = x + RandomOffset(200, 400), Y = y + RandomOffset(200, 400) }
     end
-    RicksMLC_MapUtils.OverlayPNG(mapUI, x, y, scale, layerName, tex, alpha)    
+    RicksMLC_MapUtils.OverlayPNG(mapUI, visualDecoratorData.CoffeeStain.X, visualDecoratorData.CoffeeStain.Y, scale, layerName, tex, alpha)    
+    return visualDecoratorData
+end
+
+local function VisualChatDecorator(mapUI, x, y, visualDecoratorData)
+    visualDecoratorData = DrawCoffeeStain(mapUI, x, y, visualDecoratorData)
+    --visualDecoratorData = DrawLeftHandPrint(mapUI, x, y, visualDecoratorData)
+    visualDecoratorData = DrawHandPrints(mapUI, x, y, visualDecoratorData, "Left", -1)
+    visualDecoratorData = DrawHandPrints(mapUI, x, y, visualDecoratorData, "Right", 1)
     return visualDecoratorData
 end
 
@@ -151,11 +172,11 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
     --treasures = RicksMLC_Utils.SplitStr(chatArgs.Treasure, ",")
     treasures = SplitStrIntoTreasureItems(chatArgs.Treasure)
     local uniqueName = self:MakeUniqueName(chatArgs.Name)
-    --local townName = AddPlayerCentredTownToTreasureHunt(uniqueName)
+    local townName = AddPlayerCentredTownToTreasureHunt(uniqueName)
     local treasureHuntDefn = {
         Name = uniqueName,
-        --Town = townName, -- FIXME: Temporary change to test centreing the map on the player
-        Town = chatArgs.Town, 
+        Town = townName, -- FIXME: Temporary change to test centreing the map on the player
+        --Town = chatArgs.Town, 
         Barricades = tonumber(chatArgs.Barricades),
         Zombies = tonumber(chatArgs.Zombies),
         Treasures = treasures,
