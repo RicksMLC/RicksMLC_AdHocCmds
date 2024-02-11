@@ -78,15 +78,21 @@ local function DrawHandPrints(mapUI, x, y, visualDecoratorData, hand, mapSide)
         visualDecoratorData[handPrints] = {}
     end
 
+    if #visualDecoratorData[handPrints] > 2 then
+        -- TODO: Finger/thumb prints or some other grime
+    end
+
     visualDecoratorData[handPrints][#visualDecoratorData[handPrints]+1] = {
         DirtyHand = dirtyHand,
         X = x + (ZombRand(300, 500) * mapSide),
-        Y = y + RandomOffset(250, 350)
+        Y = y + RandomOffset(250, 350),
+        Texture = tex,
+        Alpha = math.max(dirtyHand.Blood, dirtyHand.Dirt)
     }
 
     for i, v in ipairs(visualDecoratorData[handPrints]) do
-        alpha = math.max(v.DirtyHand.Blood, v.DirtyHand.Dirt)
-        RicksMLC_MapUtils.OverlayPNG(mapUI, v.X, v.Y, scale, layerName, tex, alpha)    
+        
+        RicksMLC_MapUtils.OverlayPNG(mapUI, v.X, v.Y, scale, layerName, v.Texture, v.Alpha)
     end
     return visualDecoratorData
 end
@@ -99,7 +105,7 @@ local function DrawCoffeeStain(mapUI, x, y, visualDecoratorData)
     local alpha = 0.5
 
     -- Randomise the location of the coffee stain
-    if not visualDecoratorData or visualDecoratorData.X then
+    if not visualDecoratorData then
         visualDecoratorData = {}
         visualDecoratorData.CoffeeStain = { X = x + RandomOffset(200, 400), Y = y + RandomOffset(200, 400) }
     end
@@ -155,12 +161,12 @@ local function AddPlayerCentredTownToTreasureHunt(suffix)
     return townName
 end
 
-local function SplitStrIntoTreasureItems(str)
+local function SplitStrIntoTreasureItems(str, zombies, barricades)
     local treasures = {}
     treasures = RicksMLC_Utils.SplitStr(str, ",")
     local retTable = {}
     for i, v in ipairs(treasures) do
-        retTable[#retTable+1] = {Item = v, Decorator = "ChatDecorator", VisualDecorator = "VisualChatDecorator"}
+        retTable[#retTable+1] = {Item = v, Zombies = zombies, Barricades = barricades, Decorator = "ChatDecorator", VisualDecorator = "VisualChatDecorator"}
     end
     return retTable
 end
@@ -170,15 +176,15 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
     RicksMLC_SharedUtils.DumpArgs(chatArgs, 1, "RicksMLC_ChatTreasure:AddTreasureHunt")
     local treasures = {}
     --treasures = RicksMLC_Utils.SplitStr(chatArgs.Treasure, ",")
-    treasures = SplitStrIntoTreasureItems(chatArgs.Treasure)
+    treasures = SplitStrIntoTreasureItems(chatArgs.Treasure, tonumber(chatArgs.Zombies), tonumber(chatArgs.Barricades))
     local uniqueName = self:MakeUniqueName(chatArgs.Name)
     local townName = AddPlayerCentredTownToTreasureHunt(uniqueName)
     local treasureHuntDefn = {
         Name = uniqueName,
         Town = townName, -- FIXME: Temporary change to test centreing the map on the player
         --Town = chatArgs.Town, 
-        Barricades = tonumber(chatArgs.Barricades),
-        Zombies = tonumber(chatArgs.Zombies),
+        --Barricades = tonumber(chatArgs.Barricades),
+        --Zombies = tonumber(chatArgs.Zombies),
         Treasures = treasures,
         --Decorators = {[1] = "ChatDecorator"}
     }
