@@ -37,6 +37,14 @@ function RicksMLC_ChatTreasure:Init()
     self:RegisterMapDecorators()
     self:LoadModData()
     self.ChatHunts = self.ModData.ChatHunts or {}
+
+    -- Restore any generated Towns from previous runs.
+    for k, v in pairs(self.ChatHunts) do
+        if v.Bounds then
+            RicksMLC_MapUtils.AddTown(v.TownName, v.Bounds)
+        end
+    end
+
     if Events.RicksMLC_TreasureHunt_Finished then
         DebugLog.log(DebugType.Mod, "Added RickMLC_ChatTreasure.HandleTreasureHuntFinished")
         Events.RicksMLC_TreasureHunt_Finished.Add(RicksMLC_ChatTreasure.HandleTreasureHuntFinished)
@@ -115,7 +123,6 @@ end
 
 local function VisualChatDecorator(mapUI, x, y, visualDecoratorData)
     visualDecoratorData = DrawCoffeeStain(mapUI, x, y, visualDecoratorData)
-    --visualDecoratorData = DrawLeftHandPrint(mapUI, x, y, visualDecoratorData)
     visualDecoratorData = DrawHandPrints(mapUI, x, y, visualDecoratorData, "Left", -1)
     visualDecoratorData = DrawHandPrints(mapUI, x, y, visualDecoratorData, "Right", 1)
     return visualDecoratorData
@@ -147,7 +154,7 @@ function RicksMLC_ChatTreasure:MakeUniqueName(name)
         num = num + 1
         uniqueName = name .. " " .. RicksMLC_SharedUtils.to_roman(num)
     end
-    self.ChatHunts[uniqueName] = num
+    self.ChatHunts[uniqueName] = {Num = num}
     return uniqueName
 end
 
@@ -158,7 +165,7 @@ local function AddPlayerCentredTownToTreasureHunt(suffix)
     local bounds = {getPlayer():getX() - dX, getPlayer():getY() - dY, getPlayer():getX() + dX, getPlayer():getY() + dY, RicksMLC_MapUtils.DefaultMap()}
     local townName = "PlayerTown" .. suffix .. ":" .. tostring(getPlayer():getX()) .. "," .. tostring(getPlayer():getY())
     RicksMLC_MapUtils.AddTown(townName, bounds)
-    return townName
+    return {townName, bounds}
 end
 
 local function SplitStrIntoTreasureItems(str, zombies, barricades)
@@ -175,10 +182,13 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
     -- Start with the simplest: Treasure item with random town with barricade and zombie counts
     RicksMLC_SharedUtils.DumpArgs(chatArgs, 1, "RicksMLC_ChatTreasure:AddTreasureHunt")
     local treasures = {}
-    --treasures = RicksMLC_Utils.SplitStr(chatArgs.Treasure, ",")
     treasures = SplitStrIntoTreasureItems(chatArgs.Treasure, tonumber(chatArgs.Zombies), tonumber(chatArgs.Barricades))
     local uniqueName = self:MakeUniqueName(chatArgs.Name)
-    local townName = AddPlayerCentredTownToTreasureHunt(uniqueName)
+    local townData = AddPlayerCentredTownToTreasureHunt(uniqueName)
+    local townName = townData[1]
+    -- Record the town and bounds so on a restart the generated town is reloaded before using the treasure maps.
+    self.ChatHunts[uniqueName].TownName = townName
+    self.ChatHunts[uniqueName].Bounds = townData[2]
     local treasureHuntDefn = {
         Name = uniqueName,
         Town = townName, -- FIXME: Temporary change to test centreing the map on the player
