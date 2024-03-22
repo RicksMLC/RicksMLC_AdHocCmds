@@ -6,6 +6,7 @@ type=treasureHunt
 Name=ChatTreasureUniqueName
 
 -- Town can be blank (random) or one of the following: Muldraugh Rosewood Riverside Westpoint MarchRidge Louisville
+-- Setting Town=Player will centre the map on the player's current location.
 Town=
 Barricades=60
 Zombies=5

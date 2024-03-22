@@ -173,7 +173,13 @@ local function SplitStrIntoTreasureItems(str, zombies, barricades)
     treasures = RicksMLC_Utils.SplitStr(str, ",")
     local retTable = {}
     for i, v in ipairs(treasures) do
-        retTable[#retTable+1] = {Item = v, Zombies = zombies, Barricades = barricades, Decorator = "ChatDecorator", VisualDecorator = "VisualChatDecorator"}
+        retTable[#retTable+1] = {
+            Item = v, 
+            Zombies = zombies, 
+            Barricades = barricades,
+        --    Decorator = "ChatDecorator", -- Commented out as the AddTreasureHunt sets the common decorators.  I am leaving this here just in case I decide to customise it further.
+        --    VisualDecorator = "VisualChatDecorator"
+        }
     end
     return retTable
 end
@@ -184,23 +190,26 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
     local treasures = {}
     treasures = SplitStrIntoTreasureItems(chatArgs.Treasure, tonumber(chatArgs.Zombies), tonumber(chatArgs.Barricades))
     local uniqueName = self:MakeUniqueName(chatArgs.Name)
-    local townData = AddPlayerCentredTownToTreasureHunt(uniqueName)
-    local townName = townData[1]
-    -- Record the town and bounds so on a restart the generated town is reloaded before using the treasure maps.
-    self.ChatHunts[uniqueName].TownName = townName
-    self.ChatHunts[uniqueName].Bounds = townData[2]
+    local townName = chatArgs.Town
+    if chatArgs.Town == "Player" then
+        local townData = AddPlayerCentredTownToTreasureHunt(uniqueName)
+        townName = townData[1]
+        -- Record the town and bounds so on a restart the generated town is reloaded before using the treasure maps.
+        self.ChatHunts[uniqueName].TownName = townName
+        self.ChatHunts[uniqueName].Bounds = townData[2]
+        self.ModData.ChatHunts = self.ChatHunts
+        self:SaveModData()    
+    end
     local treasureHuntDefn = {
         Name = uniqueName,
-        Town = townName, -- FIXME: Temporary change to test centreing the map on the player
-        --Town = chatArgs.Town, 
-        --Barricades = tonumber(chatArgs.Barricades),
-        --Zombies = tonumber(chatArgs.Zombies),
+        Town = townName,
+        Barricades = tonumber(chatArgs.Barricades),
+        Zombies = tonumber(chatArgs.Zombies),
         Treasures = treasures,
-        --Decorators = {[1] = "ChatDecorator"}
+        Decorator = "ChatDecorator",
+        VisualDecorator = "VisualChatDecorator"
     }
     RicksMLC_TreasureHuntMgr.Instance():AddTreasureHunt(treasureHuntDefn)
-    self.ModData.ChatHunts = self.ChatHunts
-    self:SaveModData()
 end
 
 function RicksMLC_ChatTreasure:ResetLostMaps()

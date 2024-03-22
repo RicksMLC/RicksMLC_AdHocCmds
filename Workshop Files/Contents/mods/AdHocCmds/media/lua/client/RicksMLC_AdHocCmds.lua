@@ -460,7 +460,9 @@ function RicksMLC_AdHocCmds.OnGameStart()
     RicksMLC_AdHocCmdsInstance = RicksMLC_AdHocCmds:new()
 	RicksMLC_AdHocCmdsInstance:Init() -- This also inits the ChatSupply and Vending from the boot.txt config files.
 	RicksMLC_Radio.Init()
-	RicksMLC_ChatTreasure.Instance():Init()
+	if RicksMLC_ChatTreasure then
+		RicksMLC_ChatTreasure.Instance():Init()
+	end
 
 	Events.OnKeyPressed.Add(RicksMLC_AdHocCmds.OnKeyPressed)
 	Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
