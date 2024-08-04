@@ -1,4 +1,4 @@
-name=Rick's MLC Ad Hoc Commands (TEST) (Twitch/YouTube chat interaction)
+name=Rick's MLC Ad Hoc Commands (Twitch/YouTube chat interaction)
 poster=poster.png
 id=RicksMLC_AdHocCmds
 description= Chat integration tool to allow chat to interact with the player if you have TouchPortal. <LINE>
@@ -17,6 +17,7 @@ description= <INDENT:20> * Toggle storms <LINE>
 description= <INDENT:20> * Chat can supply items to the player inventory <LINE>
 description= <INDENT:20> * Cash in dogtags at Vending Machines for prizes (no refunds) <LINE>
 description= <INDENT:20> * Set the alarm on for the closest building to the player <LINE>
+description= <INDENT:20> * Spawn generated Treasure Hunts if you have the Rick's MLC Treasure Hunt mod installed
 description= <INDENT:20> * All features listed above are configurable in the text files in the /ChatIO/ directory of the mod. <LINE>
 description= <INDENT:20> * Safehouses have a Zombie Spawn Exclusion Zone.  Right click anywhere on the ground to access the setting. <LINE>
 description= <INDENT:0><LINE>
