@@ -11,3 +11,4 @@ Town=
 Barricades=60
 Zombies=5
 Treasure=Money
+Player=

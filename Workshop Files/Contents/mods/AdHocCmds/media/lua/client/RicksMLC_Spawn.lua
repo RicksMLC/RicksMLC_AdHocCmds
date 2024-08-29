@@ -58,7 +58,7 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
 	local zCount = tonumber(paramList["zCount" .. tostring(i)])
 	local spawnResult = { fullZombieArrayList = nil }
     local safeZoneRadius = nil
-    if RicksMLC_SpawnHandlerC.instance and RicksMLC_SpawnHandlerC.instance and RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius then
+    if RicksMLC_SpawnHandlerC.instance and RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius then
         safeZoneRadius = RicksMLC_SpawnHandlerC.instance.safehouseSafeZoneRadius
     end
     local spawnArgs = { 

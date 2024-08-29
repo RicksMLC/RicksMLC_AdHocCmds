@@ -150,9 +150,11 @@ function RicksMLC_ChatTreasure:MakeUniqueName(name)
     local uniqueName = name
     local num = 1
     uniqueName = name .. " " .. RicksMLC_SharedUtils.to_roman(num)
-    while self.ChatHunts[uniqueName] ~= nil do
+    local isUnique = RicksMLC_TreasureHuntMgr.Instance():IsTreasureHuntNameUnique(uniqueName)
+    while not isUnique or self.ChatHunts[uniqueName] ~= nil do
         num = num + 1
         uniqueName = name .. " " .. RicksMLC_SharedUtils.to_roman(num)
+        isUnique = RicksMLC_TreasureHuntMgr.Instance():IsTreasureHuntNameUnique(uniqueName)
     end
     self.ChatHunts[uniqueName] = {Num = num}
     return uniqueName
@@ -207,7 +209,8 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
         Zombies = tonumber(chatArgs.Zombies),
         Treasures = treasures,
         Decorator = "ChatDecorator",
-        VisualDecorator = "VisualChatDecorator"
+        VisualDecorator = "VisualChatDecorator",
+        Player = chatArgs.Player
     }
     RicksMLC_TreasureHuntMgr.Instance():AddTreasureHunt(treasureHuntDefn)
 end
