@@ -16,7 +16,6 @@ RicksMLC_ChatTreasureInstance = nil
 function RicksMLC_ChatTreasure.Instance()
     if not RicksMLC_ChatTreasureInstance then
         RicksMLC_ChatTreasureInstance = RicksMLC_ChatTreasure:new()
-        RicksMLC_ChatTreasureInstance:Init()
     end
     return RicksMLC_ChatTreasureInstance
 end
@@ -50,6 +49,12 @@ function RicksMLC_ChatTreasure:Init()
         Events.RicksMLC_TreasureHunt_Finished.Add(RicksMLC_ChatTreasure.HandleTreasureHuntFinished)
     else
         DebugLog.log(DebugType.Mod, "Error: Unable to add RickMLC_ChatTreasure.HandleTreasureHuntFinished")
+    end
+    if Events.RicksMLC_TreasureHuntClient_Finished then
+        DebugLog.log(DebugType.Mod, "Added RickMLC_ChatTreasure.HandleTreasureHuntClientFinished")
+        Events.RicksMLC_TreasureHuntClient_Finished.Add(RicksMLC_ChatTreasure.HandleTreasureHuntClientFinished)
+    else
+        DebugLog.log(DebugType.Mod, "Error: Unable to add RickMLC_ChatTreasure.HandleTreasureHuntClientFinished")
     end
 end
 
@@ -222,4 +227,24 @@ end
 function RicksMLC_ChatTreasure.HandleTreasureHuntFinished(treasureHuntDefn)
     RicksMLC_Utils.Think(getPlayer(), "Phew - I am glad the " .. treasureHuntDefn.Name .. " is over with", 1)
     getPlayer():playSound("Birthday Noisemaker Sound Effect")
+end
+
+function RicksMLC_ChatTreasure.HandleTreasureHuntClientFinished(treasureHuntDefn, username)
+    DebugLog.log(DebugType.Mod, "RicksMLC_ChatTreasure.HandleTreasureHuntClientFinished() username: " .. username .. " treasureHuntDefn.Player: " .. treasureHuntDefn.Player)
+    local msg = nil
+    if username ~= getPlayer():getUsername() then
+        if treasureHuntDefn.Player and username ~= treasureHuntDefn.Player then
+            if treasureHuntDefn.Player == getPlayer():getUsername() then
+                msg = "ARGH! Player " .. username .. " found my last treasure hunt item.  Curses!"
+            else
+                msg = "Hmm... player " .. username .. " found player " .. treasureHuntDefn.Player .. " last treasure hunt item"
+            end
+        else
+            msg =  "I sense player '" .. username .. "' has finished their treasure hunt"
+        end
+        -- TODO: Add an appropriate sound.  Maybe a bad sound if the treasure hunt was mine!
+    end
+    if msg then
+        RicksMLC_Utils.Think(getPlayer(), msg, 1)
+    end
 end
