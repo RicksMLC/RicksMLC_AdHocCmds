@@ -215,7 +215,8 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
         Treasures = treasures,
         Decorator = "ChatDecorator",
         VisualDecorator = "VisualChatDecorator",
-        Player = chatArgs.Player
+        Player = chatArgs.Player,
+        Mode = chatArgs.Mode
     }
     RicksMLC_TreasureHuntMgr.Instance():AddTreasureHunt(treasureHuntDefn)
 end
@@ -247,4 +248,5 @@ function RicksMLC_ChatTreasure.HandleTreasureHuntClientFinished(treasureHuntDefn
     if msg then
         RicksMLC_Utils.Think(getPlayer(), msg, 1)
     end
+    getPlayer():playSound("lose_01")
 end
