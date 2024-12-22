@@ -1,0 +1,4 @@
+-- Rado C.H.A.T. 106.8 MHz
+type=radioscript
+line1=
+line1color=white

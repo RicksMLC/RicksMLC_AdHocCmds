@@ -5,10 +5,14 @@ To assist in getting integration up-and-running, the RicksMLC_ChatSpawnAndSupply
 included in this directory for you to... import.
 
 It will create the following Actions:
+  "RicksMLC_BrownOut"
+  "RicksMLC_ChatRadio"
+  "RicksMLC_Flies"  (not ready yet for B42)
+  "RicksMLC_Players"  (not ready yet for B42)
+  "RicksMLC_ResetLostMaps"  (not ready yet for B42)
   "RicksMLC_Spawn"
   "RicksMLC_Supply"
-  "RicksMLC_Radio"
-  "RicksMLC_Players"
+  "RicksMLC_TreasureHunt" (not ready yet for B42)
 
 To use them create the channel point reward(s), commands and/or raid actions that you require and assign
 the corresponding Action to them.

@@ -1,0 +1,11 @@
+--boot.txt - This is loaded once at start up to initialise the vending and chat supply components.
+--
+-- First Time Instruction:
+--   The default config files below are the default ones that come with this mod.
+--   It is recommended that you copy the files and rename the copies without the "-Default" in the name.
+--   It is strongly recommended you back up the customised files before updating this mod, as updates to the mod
+--   from the workshop may clear the ChatIO directory.
+
+--ChatPot.txt=hourly
+VendingConfig-Default.txt=immediate
+ChatSupplyConfig-Default.txt=immediate

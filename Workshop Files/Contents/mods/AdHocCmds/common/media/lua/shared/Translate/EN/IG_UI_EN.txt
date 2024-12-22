@@ -1,0 +1,5 @@
+-- Rick's MLC Concussion Mod
+
+IGUI_EN {
+	IGUI_RicksMLC_Vending_CashIn = "Cash In",
+},

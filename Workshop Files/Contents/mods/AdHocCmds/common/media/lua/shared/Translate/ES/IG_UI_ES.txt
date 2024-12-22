@@ -1,0 +1,5 @@
+-- Rick's MLC Vending machine
+
+IGUI_ES {
+	IGUI_RicksMLC_Vending_CashIn = "Redimir",
+},

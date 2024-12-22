@@ -1,0 +1,9 @@
+type=radioscript
+line1=Everyone's a winner on Radio C.H.A.T
+line1color=orange
+line2=Listener RicksMLC just added 150 points to the pot!
+line2color=orange
+line3=The prize pool is now 375!
+line3color=orange
+line4=Only 625 to go to reach our goal of 1,000!
+line4color=blue

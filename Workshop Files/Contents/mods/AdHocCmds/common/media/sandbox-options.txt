@@ -1,0 +1,9 @@
+VERSION = 1,
+
+option RicksMLC_AdHocCmds.RememberZombieNames
+{
+	type = boolean,
+	default = true,
+	page = RicksMLC_AdHocCmds,
+	translation = RicksMLC_AdHocCmds_RememberZombieNames,
+}
