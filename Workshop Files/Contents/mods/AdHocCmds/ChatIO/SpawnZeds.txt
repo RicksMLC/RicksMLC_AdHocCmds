@@ -25,7 +25,26 @@
 --                  setting (see note below for details).
 --      "line1="    Radio broadcast lines.  These lines will appear on the radio if the radio is on and tuned
 --                  to Radio C.H.A.T (108.6MHz)
-
+-- B42 additions:
+--      "animalGroup=" Animal group. eg: "chicken", "cow" 
+--      "animalType="  Animal Type eg "hen" "cockrel", "chick"
+--      "animalStress= number. Over 80 will be Agitated and attack the player(s) if the animal can attack
+--      "animalCount=" number of animals to spawn.
+--
+-- Animals:
+--		    Group     Type
+--		    ---------------------------------------------
+--			chicken:  cockerel  hen  chick ;
+--			turkey:   turkeypoult  gobblers  turkeyhen ;  
+--			cow:      cow  cowcalf  bull ;  
+--			rabbit:   rabdoe  rabbuck  rabkitten ;  
+--			pig:      boar  sow  piglet ;  
+--			mouse:    mouse  mousepups  mousefemale ;  
+--			deer:     buck  doe  fawn ;  
+--			rat:      ratfemale  rat  ratbaby ;  
+--			sheep:    ram  ewe  lamb ;  
+--			spoiler:  not going to reveal this one in this release
+--
 -- Note: The "outfit" will override the "gender".  If the specified gender does not match the outfit's required
 -- gender then the gender for the outfit will be used instead of the specified gender.  If the same outfit is 
 -- available for both genders (eg "chef") and "gender=" is blank then it will generate a randomised group of 

@@ -186,6 +186,8 @@ function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
         end
     end
 
+    RicksMLC_SpawnCommon.SpawnAnimals(player, args)
+
     local spawnResult = { fullZombieArrayList = nil, spawnLoc = {}, spawnRoomInfo = {}, targetPlayerName = nil }
     if isSpawnInBuilding(player, args) then
         spawnResult = RicksMLC_SpawnCommon.SpawnInBuilding(player, args)
@@ -200,3 +202,131 @@ function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     return spawnResult
 end
 
+-- Build42: Add animals
+
+local function dumpAnimals(animals)
+    local output = ""
+    for k, v in pairs(animals) do
+        output = output .. " " .. k .. ": "
+        for k1, v1 in pairs(v) do 
+            output = output .. " " .. k1 .. " " 
+        end
+        output = output .. "; "
+    end
+    DebugLog.log(DebugType.Mod, output)
+end
+
+function RicksMLC_SpawnCommon.SpawnAnimals(player, args)
+    if not args.animalGroup then return end
+
+    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnAnimals(): animalGroup: '" .. args.animalGroup .. "' animalType: '".. args.animalType .. "' stress: " .. tostring(args.animalStress))
+
+    local animals = {}
+    local numGroups = 0
+    local defs = getAllAnimalsDefinitions()
+	for i=0, defs:size()-1 do
+		local def = defs:get(i);
+		if not animals[def:getGroup()] then
+			animals[def:getGroup()] = {}
+            numGroups = numGroups + 1
+		end
+        animals[def:getGroup()][def:getAnimalType()] = {breeds = {}};
+        local breedList = def:getBreeds();
+        for i=0, breedList:size()-1 do
+            local breed = breedList:get(i)
+            local breeds = animals[def:getGroup()][def:getAnimalType()].breeds
+            breeds[#breeds+1] = {breedName = breed:getName(), breed = breed}
+        end
+	end
+
+    --dumpAnimals(animals)
+    --RicksMLC_SharedUtils.DumpArgs(animals, 0, "getAllAnimalDefinitions()->defs")
+
+    local x = 0
+    local y = 0
+    local z = 0
+    if isSpawnInBuilding(player, args) then
+        local spawnRoomInfo = RicksMLC_SpawnCommon.ChooseSpawnRoom(player, args.minArea)
+        if spawnRoomInfo and spawnRoomInfo.freeSquare then
+            x = spawnRoomInfo.freeSquare:getX()
+            y = spawnRoomInfo.freeSquare:getY()
+            z = spawnRoomInfo.freeSquare:getZ()
+        end
+    else
+        local spawnResult = { spawnLoc = {} }
+        spawnResult.spawnLoc = RicksMLC_SpawnCommon.MakeSpawnLocation(player, args.radius, args.offset, args.facing, args.safeZoneRadius) 
+        if spawnResult.spawnLoc then
+            local randomLoc = calcRandomLocation(spawnResult.spawnLoc, args.radius)
+            x = spawnResult.spawnLoc.x
+            y = spawnResult.spawnLoc.y
+            z = spawnResult.spawnLoc.z
+        end
+    end
+
+    for i = 1, args.animalCount do
+        local cell = player:getCell()
+        local skeleton = false
+        local breedInfo = animals[args.animalGroup][args.animalType].breeds[ZombRand(1, #animals[args.animalGroup][args.animalType].breeds)] -- Random breeds
+        local breed = breedInfo.breed
+        local animal = addAnimal(cell, x, y, z, args.animalType, breed, skeleton)
+        animal:setDebugStress(args.animalStress)
+        animal:addToWorld()
+    end
+end
+
+
+-- IsoAnimal
+-- public String getStressTxt(boolean var1, int var2) {
+--     String var3 = Translator.getText("IGUI_Animal_Calm");
+--     String var4 = "";
+--     if (var1) {
+--         var4 = " (" + PZMath.roundFloat(this.stressLevel, 2) + ")";
+--     }
+--     if (this.stressLevel > 40.0F) {
+--         var3 = Translator.getText("IGUI_Animal_Unnerved");
+--     }
+--     if (this.stressLevel > 60.0F) {
+--         var3 = Translator.getText("IGUI_Animal_Stressed");
+--     }
+--     if (this.stressLevel > 80.0F) {
+--         var3 = Translator.getText("IGUI_Animal_Agitated");
+--     }
+--     if (var2 < 4) {
+--         var3 = Translator.getText("IGUI_Animal_Calm");
+--         if (this.stressLevel > 40.0F) {
+--             var3 = Translator.getText("IGUI_Animal_Stressed");
+--         }
+--     }
+--     return var3 + var4;
+-- }
+-- LuaManager {
+    -- @LuaMethod(
+    --     name = "addAnimal",
+    --     global = true
+    -- )
+    -- public static IsoAnimal addAnimal(IsoCell var0, int var1, int var2, int var3, String var4, AnimalBreed var5, boolean var6) {
+    --     return new IsoAnimal(var0, var1, var2, var3, var4, var5, var6);
+    -- }
+
+    -- @LuaMethod(
+    --     name = "addAnimal",
+    --     global = true
+    -- )
+    -- public static IsoAnimal addAnimal(IsoCell var0, int var1, int var2, int var3, String var4, AnimalBreed var5) {
+    --     return new IsoAnimal(var0, var1, var2, var3, var4, var5);
+    -- }
+
+    -- @LuaMethod(
+    --     name = "removeAnimal",
+    --     global = true
+    -- )
+    -- public static void removeAnimal(int var0) {
+    --     IsoAnimal var1 = getAnimal(var0);
+    --     if (var1 != null) {
+    --         var1.remove();
+    --     } else {
+    --         AnimalSynchronizationManager.getInstance().delete((short)var0);
+    --     }
+
+    -- }
+--}

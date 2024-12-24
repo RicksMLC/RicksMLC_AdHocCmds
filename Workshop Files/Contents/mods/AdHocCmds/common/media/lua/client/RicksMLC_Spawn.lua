@@ -53,6 +53,10 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
     self.spawnPointPreference = paramList["spawnPointPreference"]
     self.minArea = tonumber(paramList["minArea"])
     self.safeZoneRadius = tonumber(paramList["safeZoneRadius"])
+    self.animalGroup = paramList["animalGroup"]
+    self.animalType = paramList["animalType"]
+    self.animalStress = tonumber(paramList["animalStress"])
+    self.animalCount = tonumber(paramList["animalCount"])
 
 	local i = 1
 	local zCount = tonumber(paramList["zCount" .. tostring(i)])
@@ -70,6 +74,10 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
         spawnPointPreference = self.spawnPointPreference,
         minArea = self.minArea,
         safeZoneRadius = safeZoneRadius,
+        animalGroup = self.animalGroup,
+        animalType = self.animalType,
+        animalStress = self.animalStress,
+        animalCount = self.animalCount,
         outfits = {}
     }
 
