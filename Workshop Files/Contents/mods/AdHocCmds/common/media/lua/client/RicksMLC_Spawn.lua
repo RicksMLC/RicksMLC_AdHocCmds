@@ -127,6 +127,10 @@ function RicksMLC_Spawn:SpawnZombies(paramList)
 
     end
 
+    if paramList["WriteOutfits"] then
+        self:WriteOutfits()
+    end
+
     return spawnResult.fullZombieArrayList
 end
 
@@ -165,7 +169,7 @@ function RicksMLC_Spawn:Spawn(paramList)
 end
 
 function RicksMLC_Spawn:WriteOutfits()
-	--DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:WriteOutfits()")
+	DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:WriteOutfits()")
 
 	local femaleOutfits = getAllOutfits(true);
 	self.spawnFile.contentList["zf"] = "Female outfits:"

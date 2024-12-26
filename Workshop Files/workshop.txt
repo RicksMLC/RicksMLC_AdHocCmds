@@ -15,6 +15,7 @@ description= [*] Chat can supply items to the player inventory
 description= [*] The player can cash in dogtags at Vending Machines for prizes (no refunds)
 description= [*] Set the alarm on for the closest building to the player
 description= [*] Spawn generated Treasure Hunts if you have the Rick's MLC Treasure Map mod installed
+description= [*] Spawn animals (they can be real ornery critters)
 description= [*] All features listed above are configurable in the text files in the  /ChatIO/ directory of the mod.
 description= [/list]
 description=
