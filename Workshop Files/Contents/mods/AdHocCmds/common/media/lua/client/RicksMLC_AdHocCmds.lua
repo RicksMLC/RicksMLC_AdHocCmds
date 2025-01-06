@@ -71,7 +71,7 @@ function RicksMLC_AdHocCmds:DumpChatIOFiles()
 end
 
 function RicksMLC_AdHocCmds:LoadChatIOFiles(isForceReadAll, ctrlFilePath)
-	DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:LoadChatIOFiles() " .. RicksMLC_CtrlFilePath )
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:LoadChatIOFiles() " .. RicksMLC_CtrlFilePath )
 	self.ChatIO_CtrlFile = RicksMLC_ChatIO:new(RicksMLC_ModName, ctrlFilePath)
 	self.ChatIO_CtrlFile:Load("=", isForceReadAll) 	-- Read the list of chat files to read
 
