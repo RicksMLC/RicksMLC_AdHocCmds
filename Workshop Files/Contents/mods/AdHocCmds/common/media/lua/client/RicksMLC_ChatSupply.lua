@@ -15,6 +15,7 @@ function RicksMLC_ChatSupplyConfig:new()
 	self.__index = self
 
     o.supplies = {}
+    o.isGift = true
 
 	return o
 end
@@ -24,7 +25,9 @@ function RicksMLC_ChatSupplyConfig:Update(configFile)
     local i = 1
     self.supplies = {} -- Clear all existing supplies.
     for key, value in pairs(configFile.contentList) do
-        if key ~= "type" and value then
+        if key == "gift" then
+            self.isGift = value == "true"
+        elseif key ~= "type" and value then
             --DebugLog.log(DebugType.Mod, "  key: '" .. key .. "' value: '" .. value .. "'")
             self.supplies[key] = {}
             local supplyList = RicksMLC_Utils.SplitStr(value, ",")
@@ -62,6 +65,33 @@ function RicksMLC_ChatSupply:new(supplyFile)
 	return o
 end
 
+Presents = {}
+Presents[1] = "Present_ExtraSmall"
+Presents[2] = "Present_Small"
+Presents[5] = "Present_Medium"
+Presents[10] = "Present_Large"
+Presents[20] = "Present_ExtraLarge"
+
+function RicksMLC_ChatSupply.SupplyGiftBox(item)
+    local weight = item:getWeight()
+    local box = nil
+    for key, value in pairs(Presents) do
+        if key > weight then
+            box = value
+            break
+        end
+    end
+    if box then
+        boxItem = instanceItem(box)
+        local itemInv = boxItem:getItemContainer()
+        itemInv:addItem(item)
+        RicksMLC_ChatSupply.SupplyActualItem(getPlayer(), boxItem)
+    else
+        -- The item is too big to gift wrap
+        RicksMLC_ChatSupply.SupplyActualItem(getPlayer(), item)
+    end
+end
+
 function RicksMLC_ChatSupply:Supply(contentList)
     local category = self.supplyFile:Get("category")
     local playerName = self.supplyFile:Get("player")
@@ -83,7 +113,11 @@ function RicksMLC_ChatSupply:Supply(contentList)
         return
     end
 
-    RicksMLC_ChatSupply.SupplyActualItem(getPlayer(), item)
+    if RicksMLC_ChatSupplyConfig.Instance().isGift then
+        RicksMLC_ChatSupply.SupplyGiftBox(item)
+    else
+        RicksMLC_ChatSupply.SupplyActualItem(getPlayer(), item)
+    end
 end
 
 function RicksMLC_ChatSupply.GetRandomItemType(category)

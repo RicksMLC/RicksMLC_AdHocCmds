@@ -36,6 +36,7 @@
 --   updates to the mod from the workshop may clear the ChatIO directory.
 
 type=chatsupplyconfig
+gift=true
 
 -- Supplies:
 food=Crisps,Sandwich,Pop,Plonkies,Burger,BeerBottle,Chardonnay,Wine2,WaterBottleFull,TeaBag2
