@@ -1,0 +1,7 @@
+-- Vehicle.txt
+-- action is an optional field.  Set to "remove" to remove the given part
+type=vehicle
+part=
+modelType=
+action=remove
+--repair=true

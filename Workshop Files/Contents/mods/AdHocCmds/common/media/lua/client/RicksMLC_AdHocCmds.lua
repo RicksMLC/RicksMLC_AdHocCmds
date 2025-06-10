@@ -20,6 +20,7 @@ require "RicksMLC_Flies"
 require "RicksMLC_PowerGrid"
 require "RicksMLC_TreasureHuntMgr"
 require "RicksMLC_ChatTreasure"
+require "RicksMLC_Vehicle"
 
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
@@ -172,6 +173,9 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		if RicksMLC_TreasureHuntMgr then
 			RicksMLC_ChatTreasure.Instance():ResetLostMaps()
 		end
+		return true
+	elseif scriptType == "vehicle" then
+		RicksMLC_Vehicle.ProcessCommand(chatScriptFile)
 		return true
 	end
 	return false

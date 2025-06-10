@@ -37,3 +37,4 @@
 --Radio.txt=immediate
 --ChatTreasureHunt=immediate
 --PowerGrid=immediate
+--Vehicle.txt=immediate
