@@ -1,7 +1,32 @@
 -- Vehicle.txt
--- action is an optional field.  Set to "remove" to remove the given part
+-- The action field is optional.  Set to "remove" to remove the given part or leave blank to install
+-- Parts have corresponding modelTypes that go with them. Mismatched parts to modelTypes will not be applied to the vehicle
+-- Some modelTypes only apply to a particular part and is shown in ()
+--
+-- Bullbars:
+-- part: ATA2Bullbar ATA2BullbarTruck (Truck) ATA2BullbarPolice ATA2BullbarPoliceSUV
+-- modelType: Small Medium Large LargeSpiked Plow PlowRusted PlowSpiked PlowSpikedRusted 
+-- 
+-- Windows and doors: Note that some windows and doors (eg rear on a two door car) will not be applied.
+-- part: ATA2ProtectionWindshield ATA2ProtectionWindshield ATA2ProtectionWindowFrontLeft ATA2ProtectionWindowFrontRight ATA2ProtectionWindowRearLeft ATA2ProtectionWindowRearRight ATA2ProtectionWindowMiddleLeft ATA2ProtectionWindowMiddleRight
+-- part: ATA2ProtectionTrunk ATA2ProtectionDoorsRear ATA2ProtectionHood ATA2ProtectionHoodNoScoop ATA2ProtectionDoorFrontLeft ATA2ProtectionDoorFrontRight ATA2ProtectionDoorRearLeft ATA2ProtectionDoorRearRight ATA2ProtectionDoorMiddleLeft ATA2ProtectionDoorMiddleRight 
+-- modelType: Light Heavy LightRusted HeavyRusted LightSpiked HeavySpiked LightSpikedRusted HeavySpikedRusted Reinforced ReinforcedRusted
+--
+-- Modifications:
+-- part: ATA2InteractiveTrunkRoofRack ATA2InteractiveTrunkRoofRackLightbar ATA2RoofLightFront ATA2ProtectionWheels (ATAProtection)
+-- modelType Default
+--
+-- part: ATA2AirScoop
+-- modelType: Small SmallRusted Medium MediumRusted Large LargeRusted Piped PipedRusted SmallRound SmallRoundRusted LargeRound LargeRoundRusted
+-- 
+-- part: ATA2Snorkel
+-- modelType: SnorkelLeft SnorkelRight
+--
+-- repair=true : Not Implemented Yet
+-- Example:
+
 type=vehicle
-part=
-modelType=
+part=ATABullbarTruck
+modelType=Truck
 action=remove
 --repair=true
