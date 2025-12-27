@@ -270,10 +270,10 @@ function ISCashInDogTagAction:new(character, vendingMachine, invPage, item, time
 	setmetatable(o, self)
 	self.__index = self
 	o.maxTime = time
-    if character:HasTrait("Dextrous") then
+    if character:hasTrait(CharacterTrait.DEXTROUS) then
         o.maxTime = o.maxTime * 0.5
     end
-    if character:HasTrait("AllThumbs") then
+    if character:hasTrait(CharacterTrait.ALL_THUMBS) then
         o.maxTime = o.maxTime * 2.0
     end
     o.character = character
@@ -404,7 +404,7 @@ function RicksMLC_Vending:CashInButtonPress()
     local it = self.inventoryPane.inventory:getItems()
     for i = 0, it:size()-1 do
         local item = it:get(i)
-        if item:hasTag("RicksMLC_VendingCurrency") then
+        if item:getFullType() == "RicksMLC.Necklace_DogTag_Vending" then -- item:hasTag("RicksMLC:RicksMLC_VendingCurrency") then
             local dogTagData = RicksMLC_Vending.ParseDogTag(item:getName())
             if dogTagData then
                 if dogtags[dogTagData[spawnName]] == nil then

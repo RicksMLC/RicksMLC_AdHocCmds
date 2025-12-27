@@ -137,6 +137,18 @@ RicksMLC_Commands.RicksMLC_Zombies.UpdateSafeZoneFromClient = function(player, a
     RicksMLC_SpawnServer.instance:UpdateSafeZone(player, args)
 end
 
+RicksMLC_Commands.RicksMLC_Zombies.AddZombieDogtag = function(player, args)
+    DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.AddZombieDogtag() zombieId: " .. tostring(args.zombieId) .. " dogtagLabel: " .. tostring(args.dogtagLabel))
+    local zombie = self.zombieSpawnList[args.zombieId]
+    if zombie then
+        local dogtag = instanceItem("Base.Necklace_DogTag_RicksMLC")
+        dogtag:setName(zombie.dogtagLabel)
+        dogtag:setCustomName(true)
+        zombie:addItemToSpawnAtDeath(dogtag)
+        DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.AddZombieDogtag(): Added dogtag to zombie " .. tostring(args.zombieId))
+    end
+end
+
 function RicksMLC_SpawnServer.OnZombieDead(zombie)
     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer.OnZombieDead() " .. tostring(zombie:getOnlineID()))
     RicksMLC_SpawnServer.instance:RemoveDeadZombie(zombie)

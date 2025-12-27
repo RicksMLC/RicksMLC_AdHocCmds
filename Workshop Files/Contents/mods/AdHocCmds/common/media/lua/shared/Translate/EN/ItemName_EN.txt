@@ -1,0 +1,4 @@
+
+ItemName_EN= {
+    ItemName_RicksMLC.Necklace_DogTag_Vending = "Dog Tag",
+}

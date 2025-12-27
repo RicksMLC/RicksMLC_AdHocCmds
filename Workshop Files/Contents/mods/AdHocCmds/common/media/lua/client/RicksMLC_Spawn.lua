@@ -250,10 +250,11 @@ function RicksMLC_SpawnHandler:AddDogTag(zombie)
     local zombieId = zombie:getOnlineID()
     local zombieDogTagInfo = self.spawnedZombies[zombieId]
     if zombieDogTagInfo then
-        local dogtag = instanceItem("Base.Necklace_DogTag_RicksMLC")
+        local dogtag = instanceItem("RicksMLC.Necklace_DogTag_Vending")
         dogtag:setName(zombieDogTagInfo)
         dogtag:setCustomName(true)
         zombie:addItemToSpawnAtDeath(dogtag)
+        sendClientCommand("RicksMLC_Zombies", "AddZombieDogtag", { zombieId = zombie:getOnlineID(), item = dogtag, dogtagLabel = zombieDogTagInfo } )
         self.spawnedZombies[zombieId] = nil
         self.numTrackedZombies = self.numTrackedZombies - 1
         self:UpdateOnHitZombieEvent()
