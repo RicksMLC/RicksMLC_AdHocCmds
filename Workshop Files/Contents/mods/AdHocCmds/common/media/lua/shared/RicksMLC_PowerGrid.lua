@@ -3,7 +3,6 @@
 -- this.bHydroPowerOn = GameTime.getInstance().NightsSurvived < SandboxOptions.getInstance():getElecShutModifier()
 
 require "ISBaseObject"
-require "RicksMLC_TreasureHunt"
 
 LuaEventManager.AddEvent("RicksMLC_PowerGridOn")
 LuaEventManager.AddEvent("RicksMLC_PowerGridOff")
