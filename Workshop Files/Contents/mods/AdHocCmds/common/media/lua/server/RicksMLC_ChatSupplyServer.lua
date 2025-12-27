@@ -8,31 +8,22 @@ local RicksMLC_Commands = {}
 RicksMLC_Commands.RicksMLC_ChatSupply = {}
 
 RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer = function(hostPlayer, args)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer()")
-    -- Send a message to the client to supply the player
+    -- DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer() " .. tostring(args.playerName) .. " itemType: " .. tostring(args.itemType) .. " isGift: " .. tostring(args.isGift))
+
     if args.playerName then
-        player = getPlayerFromUsername(args.playerName)
-        if not player then
-            DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply: Error: player username '" .. args.playerName .. "' not found.  Current users:")
-            local playerList = getOnlinePlayers()
-            for i = 0, playerList:size()-1 do
-                DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "'")
-                if playerList:get(i):getUsername() == args.playerName then
-                    DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "' found ¯\_(ツ)_/¯ ")
-                    player = playerList:get(i)
-                    break
-                end
-            end
-        end
+        local item = nil
+        local player = RicksMLC_ServerUtils.GetPlayer(args.playerName)
         if player then
-            sendServerCommand(player, "RicksMLC_ChatSupply", "SupplyPlayer", args)
+            item = RicksMLC_ChatSupply.SupplyToPlayer(args.itemType, player, args.isGift)
         else
             args.playerName = hostPlayer:getUsername()
-            DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply. player not found, Send back to host '" .. args.playerName .. "'")
-            sendServerCommand(hostPlayer, "RicksMLC_ChatSupply", "SupplyPlayer", args)
+            -- DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply. player not found, Send back to host '" .. args.playerName .. "'")
+            item = RicksMLC_ChatSupply.SupplyToPlayer(args.itemType, hostPlayer, args.isGift)
         end
+        args.itemDisplayName = (item and item:getDisplayName()) or "[unknown item]"
+        sendServerCommand(player, "RicksMLC_ChatSupply", "SupplyPlayer", args)
     else
-        DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer() Error playerName " .. tostring(args.playerName) .. " not set")
+        -- DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer() Error playerName " .. tostring(args.playerName) .. " not set")
     end
 end
 
@@ -41,11 +32,6 @@ local RicksMLC_ChatSupplyServer = {}
 RicksMLC_ChatSupplyServer.OnClientCommand = function(moduleName, command, player, args)
     --DebugLog.log(DebugType.Mod, 'RicksMLC_ChatSupplyServer.OnClientCommand() ' .. moduleName .. "." .. command)
     if RicksMLC_Commands[moduleName] and RicksMLC_Commands[moduleName][command] then
-         -- FIXME: Comment out when done?
-        -- local argStr = ''
- 		-- for k,v in pairs(args) do argStr = argStr..' '..k..'='..tostring(v) end
- 		-- DebugLog.log(DebugType.Mod, 'received '..moduleName..' '..command..' '..tostring(player)..argStr)
-
  		RicksMLC_Commands[moduleName][command](player, args)
     end
 end

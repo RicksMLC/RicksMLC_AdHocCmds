@@ -216,7 +216,11 @@ function RicksMLC_ChatTreasure:AddTreasureHunt(chatArgs)
         Decorator = "ChatDecorator",
         VisualDecorator = "VisualChatDecorator",
         Player = chatArgs.Player,
-        Mode = chatArgs.Mode
+        Mode = chatArgs.Mode, 
+        MapWidth = tonumber(chatArgs.MapWidth),
+        MapHeight = tonumber(chatArgs.MapHeight),
+        BuildingOffsetX = tonumber(chatArgs.BuildingOffsetX),
+        BuildingOffsetY = tonumber(chatArgs.BuildingOffsetY)
     }
     RicksMLC_TreasureHuntMgr.Instance():AddTreasureHunt(treasureHuntDefn)
 end

@@ -11,7 +11,7 @@ RicksMLC_SharedUtils.OnServerCommand = function(moduleName, command, args)
     end
 end
 
-local RicksMLC_ModName = "RicksMLC_AdHocCmds"
+local RicksMLC_ModName = "\\RicksMLC_AdHocCmds"
 local ZomboidPath = "./ChatIO/"
 
 -- Make a consistent save/load file path

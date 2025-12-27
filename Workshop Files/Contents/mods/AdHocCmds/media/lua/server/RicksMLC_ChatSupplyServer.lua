@@ -11,7 +11,7 @@ RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer = function(hostPlayer,
     --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer()")
     -- Send a message to the client to supply the player
     if args.playerName then
-        player = getPlayerFromUsername(args.playerName)
+        player = RicksMLC_ServerUtils.GetPlayer(args.playerName)
         if not player then
             DebugLog.log(DebugType.Mod, "RicksMLC_ChatSupply: Error: player username '" .. args.playerName .. "' not found.  Current users:")
             local playerList = getOnlinePlayers()
@@ -28,7 +28,7 @@ RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer = function(hostPlayer,
             sendServerCommand(player, "RicksMLC_ChatSupply", "SupplyPlayer", args)
         else
             args.playerName = hostPlayer:getUsername()
-            DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply. player not found, Send back to host '" .. args.playerName .. "'")
+            --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_ChatSupply. player not found, Send back to host '" .. args.playerName .. "'")
             sendServerCommand(hostPlayer, "RicksMLC_ChatSupply", "SupplyPlayer", args)
         end
     else
