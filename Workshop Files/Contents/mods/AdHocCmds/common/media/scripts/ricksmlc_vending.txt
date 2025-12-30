@@ -1,20 +1,16 @@
 /* ricksmlc_vending.txt  A special item to be used in vending machines */
 module RicksMLC {
-	imports {
-		Base
-	}
  
 	item Necklace_DogTag_Vending
 	{
 		DisplayCategory = Memento,
-		Type = Clothing,
 		ItemType = base:clothing,
 		Weight = 0.01,
 		Icon = Necklace_Dogtags,
-		BodyLocation = Necklace,
+		BodyLocation = base:necklace,
 		ClothingItem = Necklace_DogTag,
-		Cosmetic = TRUE,
+		Cosmetic = true,
 		WorldStaticModel = Necklace_Dogtags_Ground,
-		Tags = HasMetal;DogTag;FitsKeyRing;RicksMLC:RicksMLC_VendingCurrency,
+		Tags = base:hasmetal;base:dogtag;base:fitskeyring;RicksMLC:RicksMLC_VendingCurrency,
 	}
 }

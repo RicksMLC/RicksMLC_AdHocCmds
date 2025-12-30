@@ -79,8 +79,8 @@ local function jitterLocation(origLoc, radius)
     -- to make a circle the y needs to be calc based on x and r.  ie: y*y = r*r + x*x
     local yRadius = math.sqrt((radius * radius) - (jitterX * jitterX))
     local jitterY = ZombRand(-yRadius, yRadius)
-    jitterLoc.x = origLoc.x + jitterX
-    jitterLoc.y = origLoc.y + jitterY
+    jitterLoc.x = PZMath.fastfloor(origLoc.x + jitterX)
+    jitterLoc.y = PZMath.fastfloor(origLoc.y + jitterY)
     return jitterLoc
 end
 
@@ -202,6 +202,22 @@ function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     return spawnResult
 end
 
+-- FIXME: Remove
+-- function RicksMLC_SpawnCommon.OnCreateZombieDogtag(dogtag)
+--     local dogTagName = dogtag:getDisplayName()
+--     local dogtagModData = dogtag:getModData().RicksMLC
+--     if dogtagModData then
+--         dogTagName = dogtagModData.DogTagName -- dogtag:getDisplayName() -- .. ": " .. self.spawner .. " (" .. tostring(zId) .. " of " .. tostring(numZombies) .. ")"
+--     end
+
+--     DebugLog.log(DebugType.Mod, "RicksMLC_Spawn:OnCreateZombieDogtag(): " .. tostring(dogTagName))
+
+--     dogtag:setName(dogTagName)
+--     dogtag:setCustomName(true)
+--     return dogtag
+-- end
+
+
 -- Build42: Add animals
 
 local function dumpAnimals(animals)
@@ -219,7 +235,7 @@ end
 function RicksMLC_SpawnCommon.SpawnAnimals(player, args)
     if not args.animalGroup then return end
 
-    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnAnimals(): animalGroup: '" .. args.animalGroup .. "' animalType: '".. args.animalType .. "' stress: " .. tostring(args.animalStress))
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnAnimals(): animalGroup: '" .. args.animalGroup .. "' animalType: '".. args.animalType .. "' stress: " .. tostring(args.animalStress))
 
     local animals = {}
     local numGroups = 0

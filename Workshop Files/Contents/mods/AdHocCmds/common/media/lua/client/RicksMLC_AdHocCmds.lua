@@ -136,7 +136,11 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		spawnScript:Broadcast()
 		return true
 	elseif scriptType == "vendingconfig" then
-		RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
+		if isClient() then
+			sendClientCommand("RicksMLC_AdHocCmdsServer", "UpdateVendingConfig", {configfile = chatScriptFile})
+		else
+			RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
+		end
 		return true
 	elseif scriptType == "chatsupplyconfig" then
 		RicksMLC_ChatSupplyConfig.Instance():Update(chatScriptFile)
@@ -449,6 +453,15 @@ function RicksMLC_AdHocCmds.OnKeyPressed(key)
 	--end
 end
 
+function RicksMLC_AdHocCmds.OnServerCommand(module, command, args)
+	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnServerCommand() module: " .. tostring(module) .. " command: " .. tostring(command) )
+	if module == "RicksMLC_AdHocCmdsServer" then
+		if command == "UpdateVendingConfig" then
+			RicksMLC_VendingMachineConfig.Instance():Update(args.configfile)
+		end
+	end
+end
+
 function RicksMLC_AdHocCmds.OnGameStart()
     DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnGameStart(): ")
 	if isServer() then 
@@ -472,7 +485,7 @@ function RicksMLC_AdHocCmds.OnGameStart()
 	Events.EveryOneMinute.Add(RicksMLC_AdHocCmds.EveryOneMinute)
 	Events.EveryTenMinutes.Add(RicksMLC_AdHocCmds.EveryTenMinutes)
 	Events.EveryHours.Add(RicksMLC_AdHocCmds.EveryHours)
-
+	Events.OnServerCommand.Add(RicksMLC_AdHocCmds.OnServerCommand)
 end
 
 Events.OnGameStart.Add(RicksMLC_AdHocCmds.OnGameStart)
@@ -482,7 +495,7 @@ Events.OnGameStart.Add(RicksMLC_AdHocCmds.OnGameStart)
 function RicksMLC_AdHocCmds.OnUserUpdate()
 	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds.OnUserUpdate()")
 	local args = { isCoopHost = isCoopHost() }
-    sendClientCommand('RicksMLC_ServerCmds', 'PlayerConnectionUpdate', args)
+    sendClientCommand(getPlayer(), 'RicksMLC_ServerCmds', 'PlayerConnectionUpdate', args)
 end
 
 Events.OnConnected.Add(RicksMLC_AdHocCmds.OnUserUpdate)
