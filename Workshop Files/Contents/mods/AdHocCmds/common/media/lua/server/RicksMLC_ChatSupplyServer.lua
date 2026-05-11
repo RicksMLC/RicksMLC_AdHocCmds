@@ -12,7 +12,7 @@ RicksMLC_Commands.RicksMLC_ChatSupply.SupplyAnotherPlayer = function(hostPlayer,
 
     if args.playerName then
         local item = nil
-        local player = RicksMLC_ServerUtils.GetPlayer(args.playerName)
+        local player = RicksMLC_SharedUtils.getPlayer(args.playerName)
         if player then
             item = RicksMLC_ChatSupply.SupplyToPlayer(args.itemType, player, args.isGift)
         else

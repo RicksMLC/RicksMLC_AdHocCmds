@@ -163,13 +163,13 @@ local RicksMLC_Commands = {}
 RicksMLC_Commands.RicksMLC_Zombies = {}
 
 RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit = function(player, args)
-    DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit()")
+    --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit()")
     local spawnResult = RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     if spawnResult.fullZombieArrayList then
-        DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): AddNewSpawns() called")
+        --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): AddNewSpawns() called")
         RicksMLC_SpawnServer.Instance():AddNewSpawns(spawnResult, args.spawner)
     end
-    DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): Finished.")
+    --DebugLog.log(DebugType.Mod, "RicksMLC_Commands.RicksMLC_Zombies.SpawnOutfit(): Finished.")
 end
 
 RicksMLC_Commands.RicksMLC_Zombies.UpdateSafeZoneFromClient = function(player, args)
@@ -181,13 +181,13 @@ function RicksMLC_SpawnServer.OnZombieDead(zombie)
 end
 
 function RicksMLC_SpawnServer.OnHitZombie(zombie, character, bodyPartType, handWeapon)
-    DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer.OnHitZombie()")
+    --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnServer.OnHitZombie()")
     RicksMLC_SpawnHandler.Instance():AddDogTag(zombie)
 end
 
 function RicksMLC_SpawnServer.OnClientCommand(moduleName, command, player, args)
     -- Receive a message from a client
-    DebugLog.log(DebugType.Mod, 'RicksMLC_SpawnServer.OnClientCommand() ' .. moduleName .. "." .. command)
+    --DebugLog.log(DebugType.Mod, 'RicksMLC_SpawnServer.OnClientCommand() ' .. moduleName .. "." .. command)
     if RicksMLC_Commands[moduleName] and RicksMLC_Commands[moduleName][command] then
         -- FIXME: Comment out when done?
         -- local argStr = ''

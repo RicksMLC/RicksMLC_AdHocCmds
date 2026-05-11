@@ -43,7 +43,7 @@
 
 type=vendingconfig
 
--- Cash Ins available - Set this value to cause an automatic revert to the given config after this number of cash ins.
+-- Cash Ins available - Set this value to cause an automatic revert to the prior config after this number of cash ins.
 -- Leave blank (ie "cashIns=") so this config is the default config, and does not expire.
 cashIns=
 

@@ -25,7 +25,7 @@ require "RicksMLC_Vehicle"
 RicksMLC_AdHocCmds = ISBaseObject:derive("RicksMLC_AdHocCmds");
 RicksMLC_AdHocCmdsInstance = nil
 
-local RicksMLC_ModName = "\\RicksMLC_AdHocCmds"
+local RicksMLC_ModName = "RicksMLC_AdHocCmds"
 function RicksMLC_AdHocCmds.GetModName() return RicksMLC_ModName end
 
 local ZomboidPath = "./ChatIO/"
@@ -35,10 +35,7 @@ local RicksMLC_CtrlFilePath = ZomboidPath .. "chatInput.txt"
 local RicksMLC_CtrlBootFilePath = ZomboidPath .. "boot.txt"
 
 function RicksMLC_AdHocCmds:new()
-	local o = {}
-	setmetatable(o, self)
-	self.__index = self
-
+	local o = ISBaseObject.new(self)
 	o.ChatIO_CtrlFile = nil
 
 	o.weather = nil
@@ -48,6 +45,7 @@ function RicksMLC_AdHocCmds:new()
 	o.isStorming = false
 
 	o.skipFirstTen = true -- Skip the first 10 minute timer to prevent early spawns
+	o.isInit = false
 
     return o
 end
@@ -137,7 +135,8 @@ function RicksMLC_AdHocCmds:ScriptFactory(chatScriptFile, schedule, filename)
 		return true
 	elseif scriptType == "vendingconfig" then
 		if isClient() then
-			sendClientCommand("RicksMLC_AdHocCmdsServer", "UpdateVendingConfig", {configfile = chatScriptFile})
+			DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:ScriptFactory() Sending vending config request to server")
+			sendClientCommand(getPlayer(), "RicksMLC_Vending", "UpdateVendingConfig", {configFile = chatScriptFile})
 		else
 			RicksMLC_VendingMachineConfig.Instance():Update(chatScriptFile)
 		end
@@ -190,7 +189,6 @@ function RicksMLC_AdHocCmds:HandleEveryTenMinutes()
 		self.skipFirstTen = false
 		return
 	end
-
 	self:LoadChatIOFiles(false, RicksMLC_CtrlFilePath)
 end
 
@@ -201,7 +199,7 @@ function RicksMLC_AdHocCmds:HandleEveryHours()
 end
 
 function RicksMLC_AdHocCmds:Init()
-	--DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:Init()")
+	DebugLog.log(DebugType.Mod, "RicksMLC_AdHocCmds:Init()")
 
 	local w = getClimateManager():getWeatherPeriod();
 	self.isStorming = (w:isThunderStorm() or w:isTropicalStorm())
@@ -420,8 +418,19 @@ function RicksMLC_AdHocCmds.EveryTenMinutes()
 	end
 end
 
+local skipFirstMinute = true
+
 function RicksMLC_AdHocCmds.EveryOneMinute()
 	if not RicksMLC_AdHocCmdsInstance then return end
+	if skipFirstMinute then
+		skipFirstMinute = false
+		return
+	end
+	if not RicksMLC_AdHocCmdsInstance.isInit then
+		RicksMLC_AdHocCmdsInstance.isInit = true
+		RicksMLC_AdHocCmdsInstance:LoadChatIOFiles(false, RicksMLC_CtrlBootFilePath)
+		return
+	end
 
 	RicksMLC_AdHocCmdsInstance:MadWeather()
 end

@@ -179,7 +179,7 @@ function RicksMLC_SpawnCommon.SpawnOutfit(player, args)
     --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit()")
     if args.playerUserName and isServer() then
         --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): spawn on other player '" .. args.playerUserName .. "'")
-        local otherPlayer = RicksMLC_ServerUtils.GetPlayer(args.playerUserName, true)
+        local otherPlayer = RicksMLC_SharedUtils.getPlayer(args.playerUserName, true)
         if otherPlayer then
             player = otherPlayer
             --DebugLog.log(DebugType.Mod, "RicksMLC_SpawnCommon.SpawnOutfit(): Other player '" .. args.playerUserName .. "' found. Mwahahah.")

@@ -14,6 +14,35 @@ end
 local RicksMLC_ModName = "\\RicksMLC_AdHocCmds"
 local ZomboidPath = "./ChatIO/"
 
+
+function RicksMLC_SharedUtils.getPlayer(userName, verbose)
+    local player = getPlayerFromUsername(userName)
+    if not player then
+        if verbose then DebugLog.log(DebugType.Mod, "RicksMLC_SharedUtils.getPlayer() Error: player username '" .. userName .. "' not found.  Current users:") end
+        local playerList = getOnlinePlayers()
+        for i = 0, playerList:size()-1 do
+            if verbose then  DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "'")  end
+            if playerList:get(i):getUsername() == userName then
+                if verbose then DebugLog.log(DebugType.Mod, "  Username '" .. playerList:get(i):getUsername() .. "' found ¯\_(ツ)_/¯ ") end
+                player = playerList:get(i)
+                break
+            end
+        end
+    end
+    return player
+end
+
+function RicksMLC_SharedUtils.SplitStr(inputstr, sep)
+	if sep == nil then
+		sep = "%s"
+	end
+	local t={}
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+		table.insert(t, str)
+	end
+	return t
+end
+
 -- Make a consistent save/load file path
 --    eg: Core.getMyDocumentFolder() .. getFileSeparator() .. "mods" .. getFileSeparator() .. "RicksMLC_AdHocCmds_Data"
 -- FIXME: This doesn't really work- Remove?

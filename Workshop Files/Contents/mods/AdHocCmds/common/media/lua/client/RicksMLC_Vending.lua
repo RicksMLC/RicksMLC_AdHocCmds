@@ -3,345 +3,351 @@
 require "ISBaseObject"
 require "TimedActions/ISTimedActionQueue"
 
-RicksMLC_VendingMachineConfig = ISBaseObject:derive("RicksMLC_VendingMachineConfig")
 
-RicksMLC_VendingConfigInstance = nil
-function RicksMLC_VendingMachineConfig.Instance()
-    if isClient() then
-        -- TODO: Call the server
-    end
+-- FIXME: Remove.  This class is now in the shared code.
+-- RicksMLC_VendingMachineConfig = ISBaseObject:derive("RicksMLC_VendingMachineConfig")
 
-    if not RicksMLC_VendingConfigInstance then
-        RicksMLC_VendingConfigInstance = RicksMLC_VendingMachineConfig:new()
-    end
-    return RicksMLC_VendingConfigInstance 
-end
+-- RicksMLC_VendingConfigInstance = nil
+-- function RicksMLC_VendingMachineConfig.Instance()
+--     if isClient() then
+--         -- TODO: Call the server
+--     end
 
-function RicksMLC_VendingMachineConfig:new(prevConfig, cashIns, prevLevel)
-    local o = {}
-	setmetatable(o, self)
-	self.__index = self
+--     if not RicksMLC_VendingConfigInstance then
+--         RicksMLC_VendingConfigInstance = RicksMLC_VendingMachineConfig:new()
+--     end
+--     return RicksMLC_VendingConfigInstance 
+-- end
 
-    o.minMaxTiers = {}
-    o.tiers = {}
-    o.prizes = {}
-    o.containers = {}
+-- function RicksMLC_VendingMachineConfig:new(prevConfig, cashIns, prevLevel)
+--     local o = {}
+-- 	setmetatable(o, self)
+-- 	self.__index = self
 
-    o.cashIns = cashIns
-    o.prevVendingConfig = prevConfig
+--     o.minMaxTiers = {}
+--     o.tiers = {}
+--     o.prizes = {}
+--     o.containers = {}
 
-    o.pushLevel = 0
-    if prevLevel then
-        o.pushLevel = prevLevel + 1
-    end
+--     o.cashIns = cashIns
+--     o.prevVendingConfig = prevConfig
 
-    o.tooltipsOn = false
-    o.tooltipChatName = nil
+--     o.pushLevel = 0
+--     if prevLevel then
+--         o.pushLevel = prevLevel + 1
+--     end
 
-    -- Sound params to attract zombies
-    o.dogTagCashInRadius = 10
-    o.dogTagCashInVolume = 1
-    o.dispenseRadius = 20
-    o.dispenseVolume = 5
+--     o.tooltipsOn = false
+--     o.tooltipChatName = nil
 
-	return o
-end
+--     -- Sound params to attract zombies
+--     o.dogTagCashInRadius = 10
+--     o.dogTagCashInVolume = 1
+--     o.dispenseRadius = 20
+--     o.dispenseVolume = 5
 
-function RicksMLC_VendingMachineConfig:GetPushLevelText()
-    local txt = "Default"
-    if self.pushLevel > 0 then
-        txt = "Level " .. tostring(self.pushLevel) .. ". Remaining: " .. tostring(self.cashIns)
-    end
-    if self.tooltipChatName then
-        txt = txt .. " (" .. self.tooltipChatName .. ")"
-    end
-    return txt
-end
+-- 	return o
+-- end
 
-function RicksMLC_VendingMachineConfig:PushConfig(vendingConfigFile, cashIns)
-    local newConfig = RicksMLC_VendingMachineConfig:new(self, cashIns, self.pushLevel)
-    -- Clear the cashIns so the Update call is not recursive.
-    --DebugLog.log(DebugType.Mod, "Pusing Vending Config: cash-ins:" .. tostring(cashIns))
-    vendingConfigFile:Set("cashIns", "")
-    newConfig:Update(vendingConfigFile)
-    RicksMLC_VendingConfigInstance = newConfig
-    RicksMLC_Vending.UpdateVendingMachineTooltips()
-end
+-- function RicksMLC_VendingMachineConfig:GetPushLevelText()
+--     local txt = "Default"
+--     if self.pushLevel > 0 then
+--         txt = "Level " .. tostring(self.pushLevel) .. ". Remaining: " .. tostring(self.cashIns)
+--     end
+--     if self.tooltipChatName then
+--         txt = txt .. " (" .. self.tooltipChatName .. ")"
+--     end
+--     return txt
+-- end
 
-function RicksMLC_VendingMachineConfig:PopConfig()
-    RicksMLC_VendingConfigInstance = self.prevVendingConfig
-    RicksMLC_Vending.UpdateVendingMachineTooltips()
-    --DebugLog.log(DebugType.Mod,  "Popping Vending Config...")
-end
+-- function RicksMLC_VendingMachineConfig:PushConfig(vendingConfigFile, cashIns)
+--     local newConfig = RicksMLC_VendingMachineConfig:new(self, cashIns, self.pushLevel)
+--     -- Clear the cashIns so the Update call is not recursive.
+--     --DebugLog.log(DebugType.Mod, "Pusing Vending Config: cash-ins:" .. tostring(cashIns))
+--     vendingConfigFile:Set("cashIns", "")
+--     newConfig:Update(vendingConfigFile)
+--     RicksMLC_VendingConfigInstance = newConfig
+--     RicksMLC_Vending.UpdateVendingMachineTooltips()
+-- end
 
-function RicksMLC_VendingMachineConfig:PopConfigIfNeeded()
-    if self.cashIns then
-        self.cashIns = self.cashIns - 1
-        if self.cashIns <= 0 then
-            self:PopConfig()
-        end
-    end
-end
+-- function RicksMLC_VendingMachineConfig:PopConfig()
+--     RicksMLC_VendingConfigInstance = self.prevVendingConfig
+--     RicksMLC_Vending.UpdateVendingMachineTooltips()
+--     --DebugLog.log(DebugType.Mod,  "Popping Vending Config...")
+-- end
 
-function RicksMLC_VendingMachineConfig:UpdateAttribute(vendingConfigFile, attrib, attribName, delim)
-    local i = 1
-    local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
-    while attribLine do
-        local attribList = RicksMLC_Utils.SplitStr(attribLine, delim)
-        attrib[i] = attribList
-        i = i + 1
-        attribLine = vendingConfigFile:Get(attribName .. tostring(i))
-    end
-end
+-- function RicksMLC_VendingMachineConfig:PopConfigIfNeeded()
+--     if self.cashIns then
+--         self.cashIns = self.cashIns - 1
+--         if self.cashIns <= 0 then
+--             self:PopConfig()
+--         end
+--     end
+-- end
 
-function RicksMLC_VendingMachineConfig:UpdateTiers(vendingConfigFile)
-    self:UpdateAttribute(vendingConfigFile, self.tiers, "tier", "%-")
+-- function RicksMLC_VendingMachineConfig:UpdateAttribute(vendingConfigFile, attrib, attribName, delim)
+--     local i = 1
+--     local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+--     while attribLine do
+--         local attribList = RicksMLC_Utils.SplitStr(attribLine, delim)
+--         attrib[i] = attribList
+--         i = i + 1
+--         attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+--     end
+-- end
 
-    -- Convert the strings from the input file to numbers
-    for i = 1, #self.tiers do
-        for j = 1, #self.tiers[i] do
-            if type(self.tiers[i][j]) == "string" then
-                self.tiers[i][j] = tonumber(self.tiers[i][j])
-            end
-            if j == 1 and (not self.minMaxTiers[1] or self.tiers[i][j] < self.minMaxTiers[1]) then
-                self.minMaxTiers[1] = self.tiers[i][j]
-            elseif j == 2 and (not self.minMaxTiers[2] or self.tiers[i][j] > self.minMaxTiers[2]) then
-                self.minMaxTiers[2] = self.tiers[i][j]
-            end
-        end
-    end
-end
+-- function RicksMLC_VendingMachineConfig:UpdateTiers(vendingConfigFile)
+--     self:UpdateAttribute(vendingConfigFile, self.tiers, "tier", "%-")
 
-function RicksMLC_VendingMachineConfig:UpdatePrizes(vendingConfigFile)
-    self:UpdateAttribute(vendingConfigFile, self.prizes, "prizes", ",")
-end
+--     -- Convert the strings from the input file to numbers
+--     for i = 1, #self.tiers do
+--         for j = 1, #self.tiers[i] do
+--             if type(self.tiers[i][j]) == "string" then
+--                 self.tiers[i][j] = tonumber(self.tiers[i][j])
+--             end
+--             if j == 1 and (not self.minMaxTiers[1] or self.tiers[i][j] < self.minMaxTiers[1]) then
+--                 self.minMaxTiers[1] = self.tiers[i][j]
+--             elseif j == 2 and (not self.minMaxTiers[2] or self.tiers[i][j] > self.minMaxTiers[2]) then
+--                 self.minMaxTiers[2] = self.tiers[i][j]
+--             end
+--         end
+--     end
+-- end
 
-local function reportVendingError(errorMsg)
-    RicksMLC_Utils.Think(getPlayer(), errorMsg, 3) -- Error message is red
-    DebugLog.log(DebugType.Mod, "RicksMLC_Vending reportError() '" .. errorMsg .. "'")
-end
+-- function RicksMLC_VendingMachineConfig:UpdatePrizes(vendingConfigFile)
+--     self:UpdateAttribute(vendingConfigFile, self.prizes, "prizes", ",")
+-- end
 
-function RicksMLC_VendingMachineConfig:MakeContainer(containerList)
-    -- Returns: ContainerItem with items.
+-- local function reportVendingError(errorMsg)
+--     RicksMLC_Utils.Think(getPlayer(), errorMsg, 3) -- Error message is red
+--     DebugLog.log(DebugType.Mod, "RicksMLC_Vending reportError() '" .. errorMsg .. "'")
+-- end
 
-    --local container = InventoryItemFactory.CreateItem(containerList[2]) -- B42 is now instanceItem()
-    local container = instanceItem(containerList[2])
-    if not container then
-        reportVendingError("Container '" .. tostring(containerList[2]) .. "' of '" .. containerList[1] .. "' does not exist - check spelling and existence")
-        return nil
-    end
-    for i=3,#containerList do 
-        --local item = InventoryItemFactory.CreateItem(containerList[i])
-        local item = instanceItem(containerList[i])
-        if item then
-            container:getInventory():AddItem(item)
-        else
-            reportVendingError("Item '" .. tostring(containerList[i]) .. "' of '" .. containerList[1] .. "' does not exist.")
-        end
-    end
-    return container
-end
+-- function RicksMLC_VendingMachineConfig:MakeContainer(containerList)
+--     -- Returns: ContainerItem with items.
 
-function RicksMLC_VendingMachineConfig:AddContainerPrizes(vendingConfigFile)
-    -- Special prizes:
-    -- Eg: container1=SackOfNuts,EmptySandbag,Acorn,Acorn
+--     --local container = InventoryItemFactory.CreateItem(containerList[2]) -- B42 is now instanceItem()
+--     local container = instanceItem(containerList[2])
+--     if not container then
+--         reportVendingError("Container '" .. tostring(containerList[2]) .. "' of '" .. containerList[1] .. "' does not exist - check spelling and existence")
+--         return nil
+--     end
+--     for i=3,#containerList do 
+--         --local item = InventoryItemFactory.CreateItem(containerList[i])
+--         local item = instanceItem(containerList[i])
+--         if item then
+--             container:getInventory():AddItem(item)
+--         else
+--             reportVendingError("Item '" .. tostring(containerList[i]) .. "' of '" .. containerList[1] .. "' does not exist.")
+--         end
+--     end
+--     return container
+-- end
 
-    local i = 1
-    local attribName = "container"
-    local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
-    while attribLine do
-        local attribList = RicksMLC_Utils.SplitStr(attribLine, ",")
-        local newContainer = self:MakeContainer(attribList)
-        if newContainer then
-            self.containers[attribList[1]] = newContainer
-        end
-        i = i + 1
-        attribLine = vendingConfigFile:Get(attribName .. tostring(i))
-    end
-end
+-- function RicksMLC_VendingMachineConfig:AddContainerPrizes(vendingConfigFile)
+--     -- Special prizes:
+--     -- Eg: container1=SackOfNuts,EmptySandbag,Acorn,Acorn
 
-function RicksMLC_VendingMachineConfig:UpdateSounds(vendingConfigFile)
-    self.dogTagCashInRadius = tonumber(vendingConfigFile:Get("dogTagCashInSoundRadius"))
-    self.dogTagCashInVolume = tonumber(vendingConfigFile:Get("dogTagCashInSoundVolume"))
-    self.dispenseRadius = tonumber(vendingConfigFile:Get("dispensePrizeSoundRadius"))
-    self.dispenseVolume = tonumber(vendingConfigFile:Get("dispensePrizeSoundVolume"))
-end
+--     local i = 1
+--     local attribName = "container"
+--     local attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+--     while attribLine do
+--         local attribList = RicksMLC_Utils.SplitStr(attribLine, ",")
+--         local newContainer = self:MakeContainer(attribList)
+--         if newContainer then
+--             self.containers[attribList[1]] = newContainer
+--         end
+--         i = i + 1
+--         attribLine = vendingConfigFile:Get(attribName .. tostring(i))
+--     end
+-- end
 
-function RicksMLC_VendingMachineConfig:Update(vendingConfigFile)
-    --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:Update() ")
-    -- Clear the existing tables for re-population
+-- function RicksMLC_VendingMachineConfig:UpdateSounds(vendingConfigFile)
+--     self.dogTagCashInRadius = tonumber(vendingConfigFile:Get("dogTagCashInSoundRadius"))
+--     self.dogTagCashInVolume = tonumber(vendingConfigFile:Get("dogTagCashInSoundVolume"))
+--     self.dispenseRadius = tonumber(vendingConfigFile:Get("dispensePrizeSoundRadius"))
+--     self.dispenseVolume = tonumber(vendingConfigFile:Get("dispensePrizeSoundVolume"))
+-- end
 
-    local cashIns = tonumber(vendingConfigFile:Get("cashIns"))
-    if cashIns then
-        self:PushConfig(vendingConfigFile, cashIns)
-        return
-    end
+-- function RicksMLC_VendingMachineConfig:Update(vendingConfigFile)
+--     --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:Update() ")
+--     -- Clear the existing tables for re-population
 
-    self.tooltipsOn = (vendingConfigFile:Get("tooltips") == "on")
-    self.tooltipChatName = vendingConfigFile:Get("tooltipChatName")
+--     local cashIns = tonumber(vendingConfigFile:Get("cashIns"))
+--     if cashIns then
+--         self:PushConfig(vendingConfigFile, cashIns)
+--         return
+--     end
 
-    self.containers = {}
-    self.tiers = {}
-    self.prizes = {}
-    self:AddContainerPrizes(vendingConfigFile) -- Do this first so any defined containers are available for UpdatePrizes()
-    self:UpdateTiers(vendingConfigFile)
-    self:UpdatePrizes(vendingConfigFile)
-    self:UpdateSounds(vendingConfigFile)
-end
+--     self.tooltipsOn = (vendingConfigFile:Get("tooltips") == "on")
+--     self.tooltipChatName = vendingConfigFile:Get("tooltipChatName")
 
-function RicksMLC_VendingMachineConfig:CalcTierNum(numZombies)
-    if #self.tiers == 0 then 
-        DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:CalcTierNum() Error - no tiers set ")
-        return nil
-    end
-    for i = 1, #self.tiers do
-        if numZombies >= self.tiers[i][1] and numZombies <= self.tiers[i][2] then
-            return i
-        end
-    end
-    if numZombies < self.minMaxTiers[1] then
-        return 1
-    elseif numZombies > self.minMaxTiers[2] then
-        return #self.tiers
-    end
-end
+--     self.containers = {}
+--     self.tiers = {}
+--     self.prizes = {}
+--     self:AddContainerPrizes(vendingConfigFile) -- Do this first so any defined containers are available for UpdatePrizes()
+--     self:UpdateTiers(vendingConfigFile)
+--     self:UpdatePrizes(vendingConfigFile)
+--     self:UpdateSounds(vendingConfigFile)
+-- end
 
-function RicksMLC_VendingMachineConfig:GetRandomPrize(numZombies)
-    -- Returns: Name of the item to spawn
+-- function RicksMLC_VendingMachineConfig:CalcTierNum(numZombies)
+--     if #self.tiers == 0 then 
+--         DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:CalcTierNum() Error - no tiers set ")
+--         return nil
+--     end
+--     for i = 1, #self.tiers do
+--         if numZombies >= self.tiers[i][1] and numZombies <= self.tiers[i][2] then
+--             return i
+--         end
+--     end
+--     if numZombies < self.minMaxTiers[1] then
+--         return 1
+--     elseif numZombies > self.minMaxTiers[2] then
+--         return #self.tiers
+--     end
+-- end
 
-    local tierNum = self:CalcTierNum(numZombies)
-    if not tierNum then return end
+-- function RicksMLC_VendingMachineConfig:GetRandomPrize(numZombies)
+--     -- Returns: Name of the item to spawn
 
-    if #self.prizes[tierNum] == 0 then
-        DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() Error - no prizes in tier " .. tostring(tierNum))
-        return
-    end
-    local rnd = PZMath.roundToInt(ZombRand(1, #self.prizes[tierNum]+1))
-    --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() " .. tostring(rnd))
-    return self.prizes[tierNum][rnd]
-end
+--     local tierNum = self:CalcTierNum(numZombies)
+--     if not tierNum then return end
 
-------------------------------------------------------------------------------
--- Timed Actions:
+--     if #self.prizes[tierNum] == 0 then
+--         DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() Error - no prizes in tier " .. tostring(tierNum))
+--         return
+--     end
+--     local rnd = PZMath.roundToInt(ZombRand(1, #self.prizes[tierNum]+1))
+--     --DebugLog.log(DebugType.Mod, "RicksMLC_VendingMachineConfig:GetRandomPrize() " .. tostring(rnd))
+--     return self.prizes[tierNum][rnd]
+-- end
 
--- Dogtag cash in timed action
-ISCashInDogTagAction = ISBaseTimedAction:derive("ISCashInDogTagAction");
 
-function ISCashInDogTagAction:isValid()
-    return true
-end
 
-function ISCashInDogTagAction:waitToStart()
-	self.character:faceThisObject(self.vendingMachine)
-	return self.character:shouldBeTurning()end
+-- ------------------------------------------------------------------------------
+-- -- Timed Actions:
 
-function ISCashInDogTagAction:start()
-	self.sound = self.character:playSound("VendingMachineCoin02")
-end
+-- -- Dogtag cash in timed action
+-- ISCashInDogTagAction = ISBaseTimedAction:derive("ISCashInDogTagAction");
 
-function ISCashInDogTagAction:stop()
-	ISBaseTimedAction.stop(self)
-end
+-- function ISCashInDogTagAction:isValid()
+--     return true
+-- end
 
-function ISCashInDogTagAction:perform()
-	self.character:stopOrTriggerSound(self.sound)
-    local vendingMachineConfigInst = RicksMLC_VendingMachineConfig:Instance()
+-- function ISCashInDogTagAction:waitToStart()
+-- 	self.character:faceThisObject(self.vendingMachine)
+-- 	return self.character:shouldBeTurning()end
 
-    if vendingMachineConfigInst.dogTagCashInRadius and vendingMachineConfigInst.dogTagCashInVolume then
-        addSound(self.vendingMachine,
-                 self.vendingMachine:getX(), 
-                 self.vendingMachine:getY(), 
-                 self.vendingMachine:getZ(), 
-                 vendingMachineConfigInst.dogTagCashInRadius, 
-                 vendingMachineConfigInst.dogTagCashInVolume)
-    end
-    if isClient() then
-        self.item:getContainer():removeItemOnServer(self.item)
-    end
-    local container = self.item:getContainer() -- Double clicking the Cash In button may cause a race condition.
-    if container then container:DoRemoveItem(self.item) end
+-- function ISCashInDogTagAction:start()
+-- 	self.sound = self.character:playSound("VendingMachineCoin02")
+-- end
 
-    -- needed to remove from queue / start next.
-	ISBaseTimedAction.perform(self)
-end
+-- function ISCashInDogTagAction:stop()
+-- 	ISBaseTimedAction.stop(self)
+-- end
 
-function ISCashInDogTagAction:new(character, vendingMachine, invPage, item, time)
-	local o = {}
-	setmetatable(o, self)
-	self.__index = self
-	o.maxTime = time
-    if character:hasTrait(CharacterTrait.DEXTROUS) then
-        o.maxTime = o.maxTime * 0.5
-    end
-    if character:hasTrait(CharacterTrait.ALL_THUMBS) then
-        o.maxTime = o.maxTime * 2.0
-    end
-    o.character = character
-	-- custom fields
-	o.vendingMachine = vendingMachine
-    o.invPage = invPage
-	o.item = item
+-- function ISCashInDogTagAction:perform()
+-- 	self.character:stopOrTriggerSound(self.sound)
+--     local vendingMachineConfigInst = RicksMLC_VendingMachineConfig:Instance()
 
-	return o
-end
+--     if vendingMachineConfigInst.dogTagCashInRadius and vendingMachineConfigInst.dogTagCashInVolume then
+--         addSound(self.vendingMachine,
+--                  self.vendingMachine:getX(), 
+--                  self.vendingMachine:getY(), 
+--                  self.vendingMachine:getZ(), 
+--                  vendingMachineConfigInst.dogTagCashInRadius, 
+--                  vendingMachineConfigInst.dogTagCashInVolume)
+--     end
+--     if isClient() then
+--         self.item:getContainer():removeItemOnServer(self.item)
+--     end
+--     local container = self.item:getContainer() -- Double clicking the Cash In button may cause a race condition.
+--     if container then container:DoRemoveItem(self.item) end
 
---------------------
--- Vend timed action
-ISCashInVendAction = ISBaseTimedAction:derive("ISCashInVendAction");
+--     -- needed to remove from queue / start next.
+-- 	ISBaseTimedAction.perform(self)
+-- end
 
-function ISCashInVendAction:isValid()
-    return true
-end
+-- function ISCashInDogTagAction:new(character, vendingMachine, invPage, item, time)
+-- 	local o = {}
+-- 	setmetatable(o, self)
+-- 	self.__index = self
+-- 	o.maxTime = time
+--     if character:hasTrait(CharacterTrait.DEXTROUS) then
+--         o.maxTime = o.maxTime * 0.5
+--     end
+--     if character:hasTrait(CharacterTrait.ALL_THUMBS) then
+--         o.maxTime = o.maxTime * 2.0
+--     end
+--     o.character = character
+-- 	-- custom fields
+-- 	o.vendingMachine = vendingMachine
+--     o.invPage = invPage
+-- 	o.item = item
 
-function ISCashInVendAction:waitToStart()
-	self.character:faceThisObject(self.vendingMachine)
-	return self.character:shouldBeTurning()end
+-- 	return o
+-- end
 
-function ISCashInVendAction:start()
-	self.sound = self.character:playSound("VendingMachineVend01")
-end
+-- --------------------
+-- -- Vend timed action
+-- ISCashInVendAction = ISBaseTimedAction:derive("ISCashInVendAction");
 
-function ISCashInVendAction:stop()
-	ISBaseTimedAction.stop(self)
-end
+-- function ISCashInVendAction:isValid()
+--     return true
+-- end
 
-function ISCashInVendAction:perform()
-	self.character:stopOrTriggerSound(self.sound)
-    local vendingMachineConfigInst = RicksMLC_VendingMachineConfig:Instance()
-    if vendingMachineConfigInst.dispenseRadius and vendingMachineConfigInst.dispenseVolume then
-        addSound(self.vendingMachine, 
-                 self.vendingMachine:getX(), 
-                 self.vendingMachine:getY(), 
-                 self.vendingMachine:getZ(), 
-                 vendingMachineConfigInst.dispenseRadius, 
-                 vendingMachineConfigInst.dispenseVolume)
-    end
-    self.invPage.inventoryPane.inventory:AddItem(self.prize)
-    if isClient() then
-        -- Also add the item on the server otherwise it will disapear from the player inventory after transfer from vending machine directly to the player inventory
-        self.invPage.inventoryPane.inventory:addItemOnServer(self.prize)
-    end
-    vendingMachineConfigInst:PopConfigIfNeeded()
+-- function ISCashInVendAction:waitToStart()
+-- 	self.character:faceThisObject(self.vendingMachine)
+-- 	return self.character:shouldBeTurning() end
 
-    -- needed to remove from queue / start next.
-	ISBaseTimedAction.perform(self)
-end
+-- function ISCashInVendAction:start()
+-- 	self.sound = self.character:playSound("VendingMachineVend01")
+-- end
 
-function ISCashInVendAction:new(character, vendingMachine, invPage, prize, time)
-	local o = {}
-	setmetatable(o, self)
-	self.__index = self
-	o.maxTime = time
-    o.character = character
-	-- custom fields
-	o.vendingMachine = vendingMachine
-    o.invPage = invPage
-	o.prize = prize
-    o.dispenseRadius = 15
-    o.dispenseVolume = 2
-	return o
-end
+-- function ISCashInVendAction:stop()
+-- 	ISBaseTimedAction.stop(self)
+-- end
 
+-- function ISCashInVendAction:perform()
+-- 	self.character:stopOrTriggerSound(self.sound)
+--     local vendingMachineConfigInst = RicksMLC_VendingMachineConfig:Instance()
+--     if vendingMachineConfigInst.dispenseRadius and vendingMachineConfigInst.dispenseVolume then
+--         addSound(self.vendingMachine, 
+--                  self.vendingMachine:getX(), 
+--                  self.vendingMachine:getY(), 
+--                  self.vendingMachine:getZ(), 
+--                  vendingMachineConfigInst.dispenseRadius, 
+--                  vendingMachineConfigInst.dispenseVolume)
+--     end
+--     self.invPage.inventoryPane.inventory:AddItem(self.prize)
+--     if isClient() then
+--         -- Also add the item on the server otherwise it will disapear from the player inventory after transfer from vending machine directly to the player inventory
+--         self.invPage.inventoryPane.inventory:addItemOnServer(self.prize)
+--     end
+--     vendingMachineConfigInst:PopConfigIfNeeded()
+
+--     -- needed to remove from queue / start next.
+-- 	ISBaseTimedAction.perform(self)
+-- end
+
+-- function ISCashInVendAction:new(character, vendingMachine, invPage, prize, time)
+-- 	local o = {}
+-- 	setmetatable(o, self)
+-- 	self.__index = self
+-- 	o.maxTime = time
+--     o.character = character
+-- 	-- custom fields
+-- 	o.vendingMachine = vendingMachine
+--     o.invPage = invPage
+-- 	o.prize = prize
+--     o.dispenseRadius = 15
+--     o.dispenseVolume = 2
+-- 	return o
+-- end
+--
+-- End Timed Actions
+----------------------------------------------------------------------------------
 
 RicksMLC_Vending = ISBaseObject:derive("RicksMLC_Vending")
 function RicksMLC_Vending.RemoveDogTags(invPage, zedName, itemList)
@@ -509,5 +515,29 @@ function RicksMLC_Vending.OnGameStart()
     end
 end
 
+function RicksMLC_Vending.OnConnected()
+	DebugLog.log(DebugType.Mod, "RicksMLC_Vending.OnConnected() client - requesting full config")
+    sendClientCommand(getPlayer(), 'RicksMLC_Vending', 'RequestFullConfig', args)
+end
+
+function RicksMLC_Vending.OnServerCommand(moduleName, command, args)
+    if moduleName ~= "RicksMLC_Vending" then return end
+
+    if command == "VendingConfigUpdate" then
+        RicksMLC_VendingMachineConfig:Instance():Update(args.configFile)
+    end
+    if command == "FullVendingConfig" then
+        -- clear the configs and re-apply in order
+        DebugLog.log(DebugType.Mod, "RicksMLC_Vending.OnServerCommand() FullVendingConfig - updating " .. tostring(#args.configFiles) .. " config files")
+        RicksMLC_VendingConfigInstance = nil
+        for i = 1, #args.configFiles do
+            local vendingConfig = RicksMLC_ChatIO.CloneChatIO(args.configFiles[i])
+            RicksMLC_VendingMachineConfig:Instance():Update(vendingConfig)
+        end
+    end
+end
+
 Events.OnRefreshInventoryWindowContainers.Add(RicksMLC_Vending.OnRefreshInventoryWindowContainers)
 Events.OnGameStart.Add(RicksMLC_Vending.OnGameStart)
+Events.OnServerCommand.Add(RicksMLC_Vending.OnServerCommand)
+Events.OnConnected.Add(RicksMLC_Vending.OnConnected)
